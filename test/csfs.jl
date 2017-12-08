@@ -1,4 +1,3 @@
-workspace()
 using Base.Test
 import GRASP
 
