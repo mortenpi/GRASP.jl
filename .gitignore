@@ -1,3 +1,5 @@
+deps/grasp-path.jl
+
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
