@@ -64,7 +64,7 @@ function Base.print(io::IO, cdef::CSFDefinition)
         elseif nexc == 0
             "i"
         else
-            string(nexc)
+            string(nelec - nexc)
         end
         print(io, orb)
         write(io, "(", string(nelec), ",", nexc_str, ")")
@@ -100,7 +100,9 @@ mutable struct CSFDefinitionList
 end
 
 function Base.print(io::IO, cdl::CSFDefinitionList)
+    first = true
     for cdef in cdl.cdefs
+        first ? (first = false) : println(io)
         print(io, cdef)
     end
     nothing
