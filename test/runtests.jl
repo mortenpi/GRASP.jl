@@ -4,6 +4,7 @@ using Base.Test
 @testset "GRASP.jl" begin
 
 include("csfs.jl")
+include("rcsfs.jl")
 
 @testset "libgrasp" begin
     @test isfile("test-libgrasp")

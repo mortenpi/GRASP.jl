@@ -1,9 +1,4 @@
-const SPECTROSCOPIC_NAMES = "s p d f g h i k l m n o q r t u v" |> split
-
-function specname(l::Integer)
-    @assert l >= 0
-    SPECTROSCOPIC_NAMES[l+1]
-end
+# Non-relativistic CSF definition lists -- to generate inputs for rcsfgenerate
 
 struct CSFOrbital
     n :: Int
