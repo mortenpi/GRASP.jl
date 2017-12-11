@@ -5,3 +5,12 @@ end
 open("grasp-path.jl", "w") do io
     write(io, "const grasp2k = \"$(ENV["GRASP2K"])\"")
 end
+include("grasp-path.jl")
+
+# Creating basic GRASP input/output files, using GRASP
+# ./build-testfiles.sh cds into ../test/graspfiles
+println("Running ./build-testfiles.sh")
+run(`./build-testfiles.sh`)
+
+# Build the Fortran shared library
+run(`make`)

@@ -5,6 +5,10 @@ let grasp_path_file = joinpath(dirname(@__FILE__), "../deps/grasp-path.jl")
     include(grasp_path_file)
 end
 
+const libgrasp_so = joinpath(dirname(@__FILE__), "..", "deps", "libgrasp.so")
+isfile(libgrasp_so) || error("$(libgrasp_so) does not exist. Run `Pkg.build(\"GRASP\")`.")
+
 include("csfs.jl")
+include("rmix.jl")
 
 end # module

@@ -1,5 +1,9 @@
-deps/grasp-path.jl
-
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+
+test/test-libgrasp
+deps/grasp-path.jl
+deps/*.o
+deps/*.so
+deps/*.mod
