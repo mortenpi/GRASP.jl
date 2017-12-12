@@ -16,10 +16,24 @@ end
 
 struct CSF
     orbitals :: Vector{FilledOrbital}
+    coupled2Js :: Vector{Int}
     total2J :: Int
     "State with positive or negative parity? `true` = positive."
     parity :: Bool
-    CSF(total2J, parity, orbs) = new(orbs, total2J, parity)
+    CSF(total2J, parity, orbs, coupled2Js) = new(orbs, coupled2Js, total2J, parity)
+end
+
+struct CSFBlock
+    csfs :: Vector{CSF}
+    total2J :: Int
+    "State with positive or negative parity? `true` = positive."
+    parity :: Bool
+    CSFBlock(total2J, parity, csfs) = new(csfs, total2J, parity)
+end
+
+function Base.push!(csfb::CSFBlock, csf::CSF)
+    @assert csf.total2J == csfb.total2J
+    push!(csfb.csfs, csf)
 end
 
 function parse_rcsf(filename)
@@ -34,7 +48,7 @@ function parse_rcsf(filename)
         core_orbs = parse_cores(line_cores)
 
         blockid, csfid = 1, 1
-        csfs = CSF[]
+        csfblocks = CSFBlock[]
         while ! eof(io)
             line1 = readline(io)
             if startswith(line1, " *")
@@ -46,13 +60,16 @@ function parse_rcsf(filename)
             line2 = strip(readline(io), ['\n', '\r'])
             line3 = strip(readline(io), ['\n', '\r'])
 
-            #@show blockid, csfid
-            #println(line1); println(line2); println(line3)
-            total2J, parity, orbs = parse_csflines(line1, line2, line3)
-            csf = CSF(total2J, parity, vcat(core_orbs, orbs))
-            push!(csfs, csf)
+            total2J, parity, orbs, coupled2Js = parse_csflines(line1, line2, line3)
+            csf = CSF(total2J, parity, vcat(core_orbs, orbs), vcat(zeros(Int, length(core_orbs)), coupled2Js))
+
+            if isempty(csfblocks) || last(csfblocks).total2J != total2J || last(csfblocks).parity != parity
+                push!(csfblocks, CSFBlock(total2J, parity, [csf]))
+            else
+                push!(last(csfblocks), csf)
+            end
         end
-        return csfs
+        return csfblocks
     end
 end
 
@@ -61,6 +78,7 @@ function parse_csflines(line1, line2, line3)
     @assert length(line1) % 9 == 0
 
     orbs = FilledOrbital[]
+    coupled2Js = Int[]
     for i = 1:div(length(line1), 9)
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
@@ -71,16 +89,24 @@ function parse_csflines(line1, line2, line3)
         # pick out coupled angular momentum from the second line:
         orb2J = (length(line2) >= 9*i) ? parse2J(line2[9*(i-1)+1:9*i]) : 0
 
+        # Pick the J-coupling from between the orbitals (line3).
+        # The items in that line are shifted by three characters for some reason.
+        if i > 1
+            # TODO: Document this hack
+            c2J = parse2J(line3[9*(i-1)+4:min(9*i+3, length(rstrip(line3))-1)])
+            push!(coupled2Js, c2J)
+        else
+            @assert strip(line3[9*(i-1)+2:9*i+1]) |> isempty
+        end
+
         push!(orbs, FilledOrbital(n, kappa, orb2J, nelec))
     end
 
-    # Get the total angular momentum from line3
+    # Get the total angular momentum and parity
+    parity = parse_parity(last(strip(line3)))
+    total2J = last(coupled2Js)
 
-    total2J, parity = let x = strip(line3)
-        parse2J(x[1:end-1]), parse_parity(x[end]) > 0
-    end
-
-    total2J, parity, orbs
+    total2J, parity, orbs, coupled2Js
 end
 
 
