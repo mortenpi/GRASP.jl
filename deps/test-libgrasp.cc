@@ -8,7 +8,7 @@ struct blocksinfo_t {
 struct block_t {
     int blockid, ncsfs, nevs, iatjp, iaspa;
     double eav;
-    double * eigenstates;
+    double * eigenstates, * eigenenergies;
 };
 extern "C" void mixread(const char *, blocksinfo_t*, block_t**);
 
@@ -42,8 +42,15 @@ int main(int argc, char * argv[]) {
         cout << "  "; COUT_MEMBER(blocks[ib], iatjp);
         cout << "  "; COUT_MEMBER(blocks[ib], iaspa);
         cout << "  "; COUT_MEMBER(blocks[ib], eav);
-        cout << "  "; COUT_MEMBER(blocks[ib], eigenstates);
 
+        cout << "  "; COUT_MEMBER(blocks[ib], eigenenergies);
+        for(size_t i=0; i < blocks[ib].nevs; i++) {
+            cout.width(20);
+            cout << blocks[ib].eigenenergies[i] << " ";
+        }
+        cout << endl;
+
+        cout << "  "; COUT_MEMBER(blocks[ib], eigenstates);
         for(size_t i=0; i < blocks[ib].ncsfs; i++) {
             for(size_t j=0; j < blocks[ib].nevs; j++) {
                 //cout << blocks[i].eigenstates[j][i] << " ";

@@ -55,6 +55,7 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
         integer(c_int) :: iatjp, iaspa
         real(c_double) :: eav
         type(c_ptr) :: eigenstates
+        type(c_ptr) :: eigenenergies
     end type
 
     integer, parameter :: dp = real64
@@ -73,15 +74,8 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
 
     integer :: ib, nb, ncfblk, nevblk, iatjp, iaspa
 
-    integer :: i, j, ivecdum
-    real(real64) :: eav
-    !integer, allocatable ::
+    integer :: i, j, dummy_int
     real(c_double), pointer :: eval(:), evec(:,:)
-
-    ! TESTING
-    real(real64) :: rowsum
-    real(real64), allocatable :: colsum(:)
-    integer(c_int), pointer :: ints(:)
 
     filename = from_cstring(filename_cstr)
     open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, IOMSG=iom)
@@ -102,15 +96,8 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     !
     !     READ (nfmix) nelec, ncftot, nw, nvectot, nvecsiz, nblock
     !
-    print *, "<pre>blockinfo%nelectrons", blockinfo%nelectrons
     read(fhandle) blockinfo%nelectrons, blockinfo%ncsfstotal, blockinfo%norbitals, &
         blockinfo%nvectotal, blockinfo%nvecsize, blockinfo%nblocks
-    print *, "blockinfo%nelectrons", blockinfo%nelectrons
-    print *, "blockinfo%ncsfstotal", blockinfo%ncsfstotal
-    print *, "blockinfo%norbitals", blockinfo%norbitals
-    print *, "blockinfo%nvectotal", blockinfo%nvectotal
-    print *, "blockinfo%nvecsize", blockinfo%nvecsize
-    print *, "blockinfo%nblocks", blockinfo%nblocks
 
     allocate(blocks(blockinfo%nblocks))
     blocks_ptr = c_loc(blocks)
@@ -125,43 +112,21 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
         blocks(ib)%ncsfs = ncfblk
         blocks(ib)%nevs = nevblk
 
-        !CALL alloc (pnteval, nevblk, 8)
-        !CALL alloc (pntevec, nevblk*ncfblk, 8)
-        !CALL alloc (pntiset, ncfblk, 4)
+        ! The original allocations:
+        !   CALL alloc (pnteval, nevblk, 8)
+        !   CALL alloc (pntevec, nevblk*ncfblk, 8)
+        !   CALL alloc (pntiset, ncfblk, 4)
         allocate(eval(nevblk), evec(ncfblk, nevblk))
         blocks(ib)%eigenstates = c_loc(evec)
+        blocks(ib)%eigenenergies = c_loc(eval)
 
-        allocate(colsum(nevblk)) ! TEST
-
-        read(fhandle) (ivecdum, i = 1, nevblk)
+        read(fhandle) (dummy_int, i = 1, nevblk)
         read(fhandle) blocks(ib)%eav, (eval(i), i = 1, nevblk)
         read(fhandle) ((evec(i,j), i = 1, ncfblk), j = 1, nevblk)
 
-        print *, blocks(ib)%eav
-        print *, size(eval), eval
-
-        print *, "evec=", size(evec), shape(evec)
         do j = 1, nevblk
-            colsum(j) = 0.0_dp
+            eval(j) = blocks(ib)%eav + eval(j)
         enddo
-        do i = 1, ncfblk
-            eav = 0.0_dp
-            do j = 1, nevblk
-                write(*, "(f10.5)", advance="no") evec(i,j)
-                eav = eav + abs(evec(i,j))**2
-                colsum(j) = colsum(j) + abs(evec(i,j))**2
-            enddo
-            write(*, "(' -> ', f10.5)", advance="no") eav
-            print *
-        enddo
-
-        do j = 1, nevblk
-            write(*, "(f10.5)", advance="no") colsum(j)
-        enddo
-        print *
-
-        deallocate(eval)
-        deallocate(colsum) ! TEST
     enddo
 
     close(fhandle)
