@@ -40,6 +40,7 @@ function Base.push!(cdef::CSFDefinition, orbital::CSFOrbital, nelec, nexc)
     push!(cdef.orbitals, orbital)
     push!(cdef.nelectrons, nelec)
     push!(cdef.nexcitations, nexc)
+    cdef
 end
 
 Base.length(cdef::CSFDefinition) = length(cdef.orbitals)
