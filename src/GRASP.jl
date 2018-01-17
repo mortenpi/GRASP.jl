@@ -2,6 +2,8 @@ module GRASP
 using DocStringExtensions
 import Humanize
 
+export nelectrons, nexcitations
+
 let grasp_path_file = joinpath(dirname(@__FILE__), "../deps/grasp-path.jl")
     isfile(grasp_path_file) || error("deps/grasp-path.jl does not exist. Run `Pkg.build(\"GRASP\")`.")
     include(grasp_path_file)
@@ -17,6 +19,19 @@ function specname(l::Integer)
     SPECTROSCOPIC_NAMES[l+1]
 end
 
+"""
+    nelectrons(obj)
+
+Calculate the number of electrons in `obj`.
+"""
+function nelectrons end
+
+"""
+    nexcitations(from, to)
+
+Calculate the number of excitations needed to go from `from` to `to`.
+"""
+function nexcitations end
 
 include("csfs.jl")
 include("rcsfs.jl")

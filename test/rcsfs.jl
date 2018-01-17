@@ -1,7 +1,33 @@
 using Base.Test
-import GRASP
+using GRASP
 
 @testset "rcsfs.jl" begin
+
+import GRASP: FilledOrbital, CSF
+@testset "CSF" begin
+    # FilledOrbital(n, kappa, total2J, nelectrons)
+    orb1 = FilledOrbital(1, -1, 0, 2)
+    @test string(orb1) == "1s(2~0)"
+
+    orb2 = FilledOrbital(3, 2, 0, 4)
+    @test string(orb2) == "3d-(4~0)"
+
+    orb3 = FilledOrbital(4, -3, 0, 4)
+    @test string(orb3) == "4d(4~0)"
+
+    # CSF(total2J, parity, orbs, coupled2Js)
+    csf1 = CSF(0, true, [orb1, orb2], [0, 0])
+    @test string(csf1) == "1s(2~0) 3d-(4~0) ~ 0+"
+    @test nelectrons(csf1) == 6
+
+    csf2 = CSF(0, true, [orb1, orb3], [0, 0])
+    @test string(csf2) == "1s(2~0) 4d(4~0) ~ 0+"
+    @test nelectrons(csf2) == 6
+
+    @test nexcitations(csf1, csf1) == 0
+    @test nexcitations(csf2, csf2) == 0
+    @test nexcitations(csf1, csf2) == 4
+end
 
 import GRASP: parse_l
 @testset "parse_l" begin

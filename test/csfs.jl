@@ -1,6 +1,5 @@
 using Base.Test
-import GRASP
-
+using GRASP
 import GRASP: CSFOrbital, CSFDefinition, CSFDefinitionList
 
 @testset "csfs.jl" begin
@@ -35,9 +34,24 @@ end
     end
 
     @test string(cdef1) == "1s(2,i)2s(2,i)2p(6,i)3s(2,i)3p(6,i)3d(10,i)"
-    @test string(cdef2) == "4s(2,i)4p(6,i)4d(10,i)4f(14,i)5s(2,i)5p(6,i)5d(10,i)5f(14,i)"
+    @test nelectrons(cdef1) == 28
 
-    @test string(cdef1 * cdef2) == "1s(2,i)2s(2,i)2p(6,i)3s(2,i)3p(6,i)3d(10,i)4s(2,i)4p(6,i)4d(10,i)4f(14,i)5s(2,i)5p(6,i)5d(10,i)5f(14,i)"
+    cdef_combined = cdef1 * cdef2
+    @test string(cdef_combined) == "1s(2,i)2s(2,i)2p(6,i)3s(2,i)3p(6,i)3d(10,i)4s(2,i)4p(6,i)4d(10,i)4f(14,i)5s(2,i)5p(6,i)5d(10,i)5f(14,i)"
+    @test nelectrons(cdef_combined) == 28 + 64
+
+    # Test `nexcitations(::CSFDefinition, ::CSFDefinition)`
+    cdef3 = CSFDefinition()
+    push!(cdef3, GRASP.CSFOrbital(1, 0), 2, 0)
+    push!(cdef3, GRASP.CSFOrbital(2, 0), 2, 0)
+    cdef4 = CSFDefinition()
+    push!(cdef4, GRASP.CSFOrbital(1, 0), 2, 0)
+    push!(cdef4, GRASP.CSFOrbital(2, 1), 2, 0)
+
+    @test nexcitations(cdef3, cdef3) == 0
+    @test nexcitations(cdef4, cdef4) == 0
+    @test nexcitations(cdef3, cdef4) == 2
+
     # TODO: Test error for *?
 end
 

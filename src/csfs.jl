@@ -53,6 +53,46 @@ end
 Base.done(cdef::CSFDefinition, i) = (i > length(cdef.orbitals))
 Base.next(cdef::CSFDefinition, i) = (cdef.orbitals[i], cdef.nelectrons[i], cdef.nexcitations[i]), i+1
 
+nelectrons(csf::CSFDefinition) = sum(csf.nelectrons)
+
+function nexcitations(csf_from::CSFDefinition, csf_to::CSFDefinition)
+    @assert nelectrons(csf_from) == nelectrons(csf_to)
+    let from_orbs = [(orb.n, orb.l) for orb in csf_from.orbitals],
+        to_orbs = [(orb.n, orb.l) for orb in csf_to.orbitals]
+        @assert length(from_orbs) == length(unique(from_orbs))
+        @assert length(to_orbs) == length(unique(to_orbs))
+    end
+
+    to_unchecked = fill(true, length(csf_to.orbitals))
+
+    nexcitations = 0
+    nremoved = 0 # for sanity checking only
+    for (i, orb) in enumerate(csf_from.orbitals)
+        # Let's count all the electrons that have been excited into some of
+        # the occupied orbitals of csf_from.
+        toids = find(o -> o.n == orb.n && o.l == orb.l, csf_to.orbitals)
+        @assert length(toids) < 2
+        if length(toids) == 0
+            nremoved += csf_from.nelectrons[i]
+        end
+        if length(toids) == 1
+            toid = first(toids)
+            @assert to_unchecked[toid]
+            to_unchecked[toid] = false
+            diff = csf_to.nelectrons[toid] - csf_from.nelectrons[i]
+            # If diff < 0, electrons have been excited from this orbital
+            (diff < 0) && (nremoved += abs(diff)) # for sanity checking
+            nexcitations += (diff > 0) ? diff : 0
+        end
+    end
+    for (i, orb) in enumerate(csf_to.orbitals)
+        to_unchecked[i] || continue
+        nexcitations += csf_to.nelectrons[i]
+    end
+    @assert nexcitations == nremoved # sanity check
+    return nexcitations
+end
+
 function Base.print(io::IO, cdef::CSFDefinition)
     for (orb, nelec, nexc) in cdef
         nexc_str = if nexc == nelec

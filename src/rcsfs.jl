@@ -36,6 +36,60 @@ function Base.push!(csfb::CSFBlock, csf::CSF)
     push!(csfb.csfs, csf)
 end
 
+nelectrons(csf :: CSF) = sum(orb.nelectrons for orb in csf.orbitals)
+
+"""
+    nexcitations(csf_from::CSF, csf_to::CSF)
+
+Calculates the excitations between relativistic orbitals. I.e. difference of occupation
+number between `nl-` to `nl` counts as an excitation.
+"""
+function nexcitations(csf_from::CSF, csf_to::CSF)
+    @assert nelectrons(csf_from) == nelectrons(csf_to)
+    let from_orbs = [(orb.n, orb.kappa) for orb in csf_from.orbitals],
+        to_orbs = [(orb.n, orb.kappa) for orb in csf_to.orbitals]
+        @assert length(from_orbs) == length(unique(from_orbs))
+        @assert length(to_orbs) == length(unique(to_orbs))
+    end
+    #from_nelecs = [orb.nelectrons for orb in csf_from.orbitals]
+
+    to_unchecked = fill(true, length(csf_to.orbitals))
+
+    nexcitations = 0
+    nremoved = 0 # for sanity checking only
+
+    # Let's count all the electrons that have been excited into some of
+    # the occupied orbitals of csf_from.
+    for orb in csf_from.orbitals
+        toids = find(o -> o.n == orb.n && o.kappa == orb.kappa, csf_to.orbitals)
+        to_nelectrons = if length(toids) == 0
+            0
+        elseif length(toids) == 1
+            # Mark this csf_to orbital checked.
+            toid = first(toids)
+            @assert to_unchecked[toid]
+            to_unchecked[toid] = false
+            csf_to.orbitals[toid].nelectrons
+        else
+            error("Too many matches ($(length(toids))) among csf_to.orbitals.")
+        end
+
+        diff = to_nelectrons - orb.nelectrons
+        # If diff < 0, electrons have been excited from this orbital
+        (diff < 0) && (nremoved += abs(diff)) # for sanity checking
+        nexcitations += (diff > 0) ? diff : 0
+    end
+
+    # Now let's loop over all the remaning csf_to orbitals
+    for (i, orb) in enumerate(csf_to.orbitals)
+        to_unchecked[i] || continue
+        nexcitations += orb.nelectrons
+    end
+
+    @assert nexcitations == nremoved # sanity check
+    return nexcitations
+end
+
 function parse_rcsf(filename)
     open(filename, "r") do io
         # First line should be "Core subshells:"
