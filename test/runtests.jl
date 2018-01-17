@@ -16,4 +16,9 @@ include("rcsfs.jl")
     @test isa(GRASP.read_rmix("graspfiles/rmix.out"), GRASP.MixingFile)
 end
 
+@testset "other" begin
+    @test GRASP.hartree2kayser(1.0) == 219474.63137
+    @test GRASP.h2k_humanize(1.0) == "219,475"
+end
+
 end

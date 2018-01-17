@@ -1,4 +1,6 @@
 module GRASP
+using DocStringExtensions
+import Humanize
 
 let grasp_path_file = joinpath(dirname(@__FILE__), "../deps/grasp-path.jl")
     isfile(grasp_path_file) || error("deps/grasp-path.jl does not exist. Run `Pkg.build(\"GRASP\")`.")
@@ -19,5 +21,34 @@ end
 include("csfs.jl")
 include("rcsfs.jl")
 include("rmix.jl")
+
+"""
+    $(SIGNATURES)
+
+Converts the energy value `x` from Hartrees to Kaysers (aka 1/cm),
+using the conversion ``1~\\textrm{Ha} = 219474.63137~\\textrm{cm}^{-1}``.
+
+# Examples
+
+```jldoctest
+julia> GRASP.hartree2kayser(1.0)
+219474.63137
+```
+"""
+hartree2kayser(x) = 219474.63137*x
+
+"""
+    $(SIGNATURES)
+
+Like [`hartree2kayser`](@ref), but produces a humanized string with thousands separators.
+
+# Examples
+
+```jldoctest
+julia> GRASP.h2k_humanize(1.0)
+"219,475"
+```
+"""
+h2k_humanize(x) = Humanize.digitsep(round(Int, hartree2kayser(x)))
 
 end # module
