@@ -143,3 +143,28 @@ function Base.print(io::IO, cdl::CSFDefinitionList)
     end
     nothing
 end
+
+"""
+    csfdefinition(csf::CSF)
+
+Reduces a `CSF` down to a `CSFDefinition`, by merging the orbitals with same `l` but a
+different `j` value.
+"""
+function csfdefinition(csf::CSF)
+    nrelos = Vector{Tuple{Int,Int}}()
+    nelecs = Dict{Tuple{Int,Int}, Int}()
+    for orb in csf.orbitals
+        nl = orb.n, kappa2l(orb.kappa)
+        if !(nl in keys(nelecs))
+            push!(nrelos, nl)
+            nelecs[nl] = 0
+        end
+        nelecs[nl] += orb.nelectrons
+    end
+
+    cd = CSFDefinition()
+    for nl in nrelos
+        push!(cd, CSFOrbital(nl...), nelecs[nl], 0)
+    end
+    return cd
+end

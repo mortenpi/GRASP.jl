@@ -55,4 +55,17 @@ end
     # TODO: Test error for *?
 end
 
+import GRASP: csfdefinition, FilledOrbital, CSF
+@testset "csfdefinition()" begin
+    csf = let orbs = [
+            FilledOrbital(1, -1, 0, 2),
+            FilledOrbital(3, 2, 0, 4)
+        ]
+        CSF(0, true, orbs, [0, 0])
+    end
+
+    csfdef = csfdefinition(csf)
+    @test nelectrons(csf) == nelectrons(csfdef)
+end
+
 end # @testset "csfs.jl"

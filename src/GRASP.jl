@@ -33,8 +33,8 @@ Calculate the number of excitations needed to go from `from` to `to`.
 """
 function nexcitations end
 
-include("csfs.jl")
 include("rcsfs.jl")
+include("csfs.jl")
 include("rmix.jl")
 
 """
