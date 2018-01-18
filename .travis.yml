@@ -1,4 +1,5 @@
 ## Documentation: http://docs.travis-ci.com/user/languages/julia/
+sudo: false # container based build
 language: julia
 os:
   - linux
@@ -14,6 +15,18 @@ git:
 matrix:
   allow_failures:
   - julia: nightly
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gfortran-5
+install:
+  - export FC="gfortran-5"
+  - ./.travis/getgrasp2k.sh
+  - source ${TRAVIS_BUILD_DIR}/../grasp2k/envset.sh
+
 
 ## uncomment and modify the following lines to manually install system packages
 #addons:
