@@ -88,8 +88,8 @@ end
 
 @testset "parse_rcsf" begin
     csfs = GRASP.parse_rcsf("graspfiles/rcsf.inp")
-    @test isa(csfs, Vector{GRASP.CSF})
-    @test length(csfs) == 6
+    @test isa(csfs, Vector{GRASP.CSFBlock})
+    @test length(csfs) == 3
 end
 
 end
