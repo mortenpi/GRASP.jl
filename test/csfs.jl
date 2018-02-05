@@ -16,6 +16,24 @@ end
     @test CSFOrbital(3,0) != CSFOrbital(3,1)
     @test CSFOrbital(3,0) != CSFOrbital(2,0)
     @test CSFOrbital(3,0) != CSFOrbital(2,1)
+
+    # ordering
+    orbitals = [CSFOrbital(n,l) for n=1:4 for l=0:(n-1)]
+    for orb in orbitals
+        @test orb == orb
+    end
+
+    for i=1:length(orbitals), j=(i+1):length(orbitals)
+        a, b = orbitals[i], orbitals[j]
+        @test a != b
+        @test a < b
+        @test a <= b
+        @test b > a
+        @test b >= a
+    end
+
+    @test CSFOrbital(1,0) < CSFOrbital(2,0) <  CSFOrbital(2,1)
+    @test CSFOrbital(1,0) < CSFOrbital(2,0) <= CSFOrbital(2,0)
 end
 
 @testset "CSFDefinition" begin

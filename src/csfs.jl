@@ -14,6 +14,8 @@ end
 import Base: ==
 ==(a::CSFOrbital, b::CSFOrbital) = (a.n == b.n) && (a.l == b.l)
 
+Base.isless(a::CSFOrbital, b::CSFOrbital) = (a.n < b.n) || (a.n == b.n && a.l < b.l)
+
 function Base.show(io::IO, co::CSFOrbital)
     write(io, "CSFOrbital(\"")
     print(io, co)
