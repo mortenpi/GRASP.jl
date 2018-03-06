@@ -228,9 +228,9 @@ end
 
 function parse_parity(c :: Char)
     if c == '+'
-         1
+         true
     elseif c == '-'
-        -1
+        false
     else
         error("Bad symbol $c")
     end
