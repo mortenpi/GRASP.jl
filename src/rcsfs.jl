@@ -147,10 +147,32 @@ function parse_csflines(line1, line2, line3)
         # The items in that line are shifted by three characters for some reason.
         if i > 1
             # TODO: Document this hack
-            c2J = parse2J(line3[9*(i-1)+4:min(9*i+3, length(rstrip(line3))-1)])
+            c2J_idx_first = 9*(i-1)+4
+            c2J_idx_last = min(9*i+3, length(rstrip(line3))-1)
+            # TODO: I used the following subrange at one point to fix one bug it appears it
+            # created another one:
+            #
+            #     c2J_idx_first = 9*i+1
+            #     c2J_idx_last  = min(9*(i+1), length(rstrip(line3))-1)
+            #
+            c2J_string = line3[c2J_idx_first:c2J_idx_last]
+            c2J = try
+                parse2J(c2J_string)
+            catch e
+                error("""
+                Error parsing 2J value on line 3 (i=$i)
+                  range $(c2J_idx_first):$(c2J_idx_last) -> '$(c2J_string)'
+                1: $(line1)
+                2: $(line2)
+                3: $(line3)
+                $(' '^(c2J_idx_first+2))^$('-'^(c2J_idx_last-c2J_idx_first-1))^
+                """)
+            end
             push!(coupled2Js, c2J)
         else
             @assert strip(line3[9*(i-1)+2:9*i+1]) |> isempty
+            # TODO: following related to the TODO above
+            #@assert strip(line3[9*i+1:9*(i+1)]) |> isempty
         end
 
         push!(orbs, FilledOrbital(n, kappa, orb2J, nelec))
