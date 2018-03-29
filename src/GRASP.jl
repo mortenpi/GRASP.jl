@@ -20,8 +20,8 @@ isfile(libgrasp_so) || error("$(libgrasp_so) does not exist. Run `Pkg.build(\"GR
 # Additional includes and imports.
 # ------------------------------------------------------------------------------------------
 
-include("Parities.jl")
-using .Parities
+include("Symmetries.jl")
+using .Symmetries
 
 const SPECTROSCOPIC_NAMES = "s p d f g h i k l m n o q r t u v" |> split
 function specname(l::Integer)
