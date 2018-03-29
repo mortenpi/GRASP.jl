@@ -3,6 +3,8 @@ using Base.Test
 
 @testset "GRASP.jl" begin
 
+@testset "parities" begin include("parities.jl") end
+
 include("csfs.jl")
 include("rcsfs.jl")
 
