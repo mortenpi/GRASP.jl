@@ -28,13 +28,20 @@ function Base.print(io::IO, co::CSFOrbital)
 end
 
 
-mutable struct CSFDefinition
+struct CSFDefinition
     orbitals :: Vector{CSFOrbital}
     "Number of allowed excitations."
     nelectrons :: Vector{Int}
     "Number of allowed excitations."
     nexcitations :: Vector{Int}
-    CSFDefinition() = new([],[],[])
+end
+CSFDefinition() = CSFDefinition([], [], [])
+function CSFDefinition(csfdef::CSFDefinition)
+    CSFDefinition(
+        copy(csfdef.orbitals),
+        copy(csfdef.nelectrons),
+        copy(csfdef.nexcitations)
+    )
 end
 
 function Base.push!(cdef::CSFDefinition, orbital::CSFOrbital, nelec, nexc)
@@ -125,11 +132,11 @@ function *(a::CSFDefinition, b::CSFDefinition)
         """)
     end
 
-    cdef = CSFDefinition()
-    cdef.orbitals = vcat(a.orbitals, b.orbitals)
-    cdef.nelectrons = vcat(a.nelectrons, b.nelectrons)
-    cdef.nexcitations = vcat(a.nexcitations, b.nexcitations)
-    return cdef
+    CSFDefinition(
+        vcat(a.orbitals, b.orbitals),
+        vcat(a.nelectrons, b.nelectrons),
+        vcat(a.nexcitations, b.nexcitations)
+    )
 end
 
 
