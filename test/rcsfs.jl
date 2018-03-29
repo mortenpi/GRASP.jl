@@ -56,26 +56,6 @@ import GRASP: kappa2rso
     @test kappa2rso(2)  == "d-"
 end
 
-import GRASP: parse2J
-@testset "parse2J" begin
-    @test parse2J("")     == 0
-    @test parse2J(" \n")  == 0
-    @test parse2J("0")    == 0
-    @test parse2J("  1")  == 2
-    @test parse2J("3/2")  == 3
-    @test parse2J("99/2") == 99
-    @test parse2J("  1/2   ") == 1
-    @test parse2J("200  ")    == 400
-end
-
-import GRASP: parse_parity
-@testset "parse_parity" begin
-    @test parse_parity("+") == 1
-    @test parse_parity("   -") == -1
-    @test parse_parity('+') == 1
-    @test parse_parity('-') == -1
-end
-
 import GRASP: parse_orbital
 @testset "parse_orbital" begin
     @test parse_orbital("1s")  == (1, -1)

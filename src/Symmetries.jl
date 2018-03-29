@@ -3,6 +3,8 @@ Types and methods related to parity.
 """
 module Symmetries
 
+using DocStringExtensions
+
 export Parity, parity
 export AngularMomentum, angularmomentum
 export AngularSymmetry
@@ -48,11 +50,15 @@ function Parity(c::Char)
     end
 end
 
-function Parity(s::AbstractString)
-    if length(s) != 1
-        throw(ArgumentError("Invalid argument `$s`. Must be a single character string."))
+function Base.parse(::Type{Parity}, s::AbstractString)
+    s = strip(s)
+    length(s) == 1 || throw(ParseError("Can't parse '$s' into Parity (bad length)."))
+    try
+        Parity(first(strip(s)))
+    catch e
+        isa(e, ArgumentError) && throw(ParseError(e.msg))
+        rethrow()
     end
-    Parity(first(s))
 end
 
 Base.show(io::IO, p::Parity) = print(io, p.even_parity ? "+" : "-")
@@ -81,6 +87,26 @@ struct AngularMomentum
         end
         new(twoj)
     end
+end
+
+"""
+    $(SIGNATURES)
+
+Parses the string `s` into the corresponding `2J`-value. String can either be a number or a
+fraction of the form `<x>/2`/ An empty string (also one including just whitespace) parses
+into 0.
+"""
+function Base.parse(::Type{AngularMomentum}, s::AbstractString)
+    twoj = if in('/', s)
+        J_numerator, J_denominator = split(s, '/'; limit=2)
+        @assert parse(Int, J_denominator) == 2
+        parse(Int, J_numerator)
+    elseif !isempty(strip(s))
+        2 * parse(Int, s)
+    else
+        0
+    end
+    return AngularMomentum(twoj)
 end
 
 Base.show(io::IO, am::AngularMomentum) = print(io, iseven(am.twoj) ? string(div(am.twoj, 2)) : "$(am.twoj)/2")

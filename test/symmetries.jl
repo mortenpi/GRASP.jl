@@ -12,15 +12,18 @@ using GRASP.Symmetries
 @test Parity('-') == Symmetries.odd
 @test_throws ArgumentError Parity(' ')
 
-@test Parity("+") == Symmetries.even
-@test Parity("-") == Symmetries.odd
-@test_throws ArgumentError Parity("")
-@test_throws ArgumentError Parity("+-")
-@test_throws ArgumentError Parity("a")
-@test_throws ArgumentError Parity("α")
-
 @test string(Symmetries.even) == "+"
 @test string(Symmetries.odd) == "-"
+
+@test parse(Parity, "+") == Symmetries.even
+@test parse(Parity, "-") == Symmetries.odd
+@test parse(Parity, " + ") == Symmetries.even
+@test parse(Parity, "\t+") == Symmetries.even
+
+@test_throws ParseError parse(Parity, "")
+@test_throws ParseError parse(Parity, " ")
+@test_throws ParseError parse(Parity, "++")
+@test_throws ParseError parse(Parity, "α")
 
 #
 # Angular momentum
@@ -34,6 +37,16 @@ using GRASP.Symmetries
 @test string(AngularMomentum(10)) == "5"
 @test string(AngularMomentum(21)) == "21/2"
 
+@test parse(AngularMomentum, "") == AngularMomentum(0)
+@test parse(AngularMomentum, "  ") == AngularMomentum(0)
+@test parse(AngularMomentum, "0") == AngularMomentum(0)
+@test parse(AngularMomentum, "1") == AngularMomentum(2)
+@test parse(AngularMomentum, "22") == AngularMomentum(44)
+@test parse(AngularMomentum, "1/2") == AngularMomentum(1)
+@test parse(AngularMomentum, "11/2") == AngularMomentum(11)
+@test parse(AngularMomentum, "10/2") == AngularMomentum(10)
+
+
 #
 # Angular symmetries
 # ------------------------------------------------------------------------------------------
@@ -44,11 +57,11 @@ using GRASP.Symmetries
 @test string(AngularSymmetry(1, Symmetries.odd))   == "1/2-"
 
 @test string(AngularSymmetry(AngularMomentum(0), '-'))  == "0-"
-@test string(AngularSymmetry(AngularMomentum(1), "+"))  == "1/2+"
+@test string(AngularSymmetry(AngularMomentum(1), '+'))  == "1/2+"
 
 @test string(AngularSymmetry(0, true))  == "0+"
 @test string(AngularSymmetry(1, false)) == "1/2-"
 @test string(AngularSymmetry(2, '-'))   == "1-"
-@test string(AngularSymmetry(3, "+"))   == "3/2+"
+@test string(AngularSymmetry(3, '+'))   == "3/2+"
 
 end

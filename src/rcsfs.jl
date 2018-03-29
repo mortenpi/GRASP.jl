@@ -207,40 +207,10 @@ function kappa2rso(kappa :: Integer)
     (kappa < 0) ? lstr : lstr*"-"
 end
 
-"""
-    parse2J(s)
 
-Parses the string `s` into the corresponding `2J`-value. String can either be a number or a
-fraction of the form `<x>/2`/ An empty string (also one including just whitespace) parses
-into 0.
-"""
-function parse2J(s)
-    if in('/', s)
-        J_numerator, J_denominator = split(s, '/'; limit=2)
-        @assert parse(Int, J_denominator) == 2
-        parse(Int, J_numerator)
-    elseif !isempty(strip(s))
-        2 * parse(Int, s)
-    else
-        0
-    end
-end
-
-function parse_parity(c :: Char)
-    if c == '+'
-         true
-    elseif c == '-'
-        false
-    else
-        error("Bad symbol $c")
-    end
-end
-
-function parse_parity(s)
-    c = strip(s)
-    @assert length(c) == 1
-    parse_parity(c[1])
-end
+@deprecate parse2J(s) Int(parse(AngularMomentum, s).twoj)
+@deprecate parse_parity(c::Char) Parity(c).even_parity
+@deprecate parse_parity(s::AbstractString) parse(Parity, s).even_parity
 
 """
 Returns `(n, kappa)`.
