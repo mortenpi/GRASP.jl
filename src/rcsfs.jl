@@ -25,14 +25,20 @@ end
 
 struct CSFBlock
     csfs :: Vector{CSF}
-    total2J :: Int
-    "State with positive or negative parity? `true` = positive."
-    parity :: Bool
-    CSFBlock(total2J, parity, csfs) = new(csfs, total2J, parity)
+    angularsym :: AngularSymmetry
+    function CSFBlock(csfs::Vector{CSF})
+        parity, total2J = first(csfs).parity, first(csfs).total2J
+        @assert all(csf -> csf.parity == parity, csfs)
+        @assert all(csf -> csf.total2J == total2J, csfs)
+        new(csfs, AngularSymmetry(total2J, parity))
+    end
 end
 
+total2J(cb::CSFBlock) = cb.angularsym.angmom.twoj
+parity(cb::CSFBlock) = parity(cb.angularsym)
+
 function Base.push!(csfb::CSFBlock, csf::CSF)
-    @assert csf.total2J == csfb.total2J
+    @assert csf.total2J == total2J(csfb)
     push!(csfb.csfs, csf)
 end
 
@@ -114,11 +120,16 @@ function parse_rcsf(filename)
             line2 = strip(readline(io), ['\n', '\r'])
             line3 = strip(readline(io), ['\n', '\r'])
 
-            total2J, parity, orbs, coupled2Js = parse_csflines(line1, line2, line3)
-            csf = CSF(total2J, parity, vcat(core_orbs, orbs), vcat(zeros(Int, length(core_orbs)), coupled2Js))
+            _total2J, _parity, orbs, coupled2Js = parse_csflines(line1, line2, line3)
+            csf = CSF(
+                _total2J,
+                _parity,
+                vcat(core_orbs, orbs),
+                vcat(zeros(Int, length(core_orbs)), coupled2Js)
+            )
 
-            if isempty(csfblocks) || last(csfblocks).total2J != total2J || last(csfblocks).parity != parity
-                push!(csfblocks, CSFBlock(total2J, parity, [csf]))
+            if isempty(csfblocks) || total2J(last(csfblocks)) != _total2J || parity(last(csfblocks)).even_parity != _parity
+                push!(csfblocks, CSFBlock([csf]))
             else
                 push!(last(csfblocks), csf)
             end
