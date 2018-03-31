@@ -6,13 +6,13 @@ using GRASP
 import GRASP: FilledOrbital, CSF
 @testset "CSF" begin
     # FilledOrbital(n, kappa, total2J, nelectrons)
-    orb1 = FilledOrbital(1, -1, 0, 2)
+    orb1 = FilledOrbital(1, -1, 2, 0)
     @test string(orb1) == "1s(2~0)"
 
-    orb2 = FilledOrbital(3, 2, 0, 4)
+    orb2 = FilledOrbital(3, 2, 4, 0)
     @test string(orb2) == "3d-(4~0)"
 
-    orb3 = FilledOrbital(4, -3, 0, 4)
+    orb3 = FilledOrbital(4, -3, 4, 0)
     @test string(orb3) == "4d(4~0)"
 
     # CSF(total2J, parity, orbs, coupled2Js)

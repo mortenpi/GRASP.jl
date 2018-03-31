@@ -3,42 +3,50 @@
 struct FilledOrbital
     n :: Int
     kappa :: Int
-    total2J :: Int
     nelectrons :: Int
+    angmom :: AngularMomentum
 
-    function FilledOrbital(n, kappa, total2J, nelectrons)
+    function FilledOrbital(n, kappa, nelectrons, angmom)
         @assert n >= 1
         @assert kappa != 0
         @assert kappa2l(kappa) < n
-        new(n, kappa, total2J, nelectrons)
+        new(n, kappa, nelectrons, angmom)
     end
 end
 
+angularmomentum(orbital::FilledOrbital) = orbital.angmom
+
 struct CSF
+    angularsym :: AngularSymmetry
     orbitals :: Vector{FilledOrbital}
-    coupled2Js :: Vector{Int}
-    total2J :: Int
-    "State with positive or negative parity? `true` = positive."
-    parity :: Bool
-    CSF(total2J, parity, orbs, coupled2Js) = new(orbs, coupled2Js, total2J, parity)
+    couplings :: Vector{AngularMomentum}
+    CSF(angmom, parity, orbs, couplings) = new(
+        AngularSymmetry(angmom, parity),
+        orbs,
+        couplings
+    )
 end
+
+parity(csf::CSF) = parity(csf.angularsym)
+angularmomentum(csf::CSF) = angularmomentum(csf.angularsym)
 
 struct CSFBlock
     csfs :: Vector{CSF}
     angularsym :: AngularSymmetry
     function CSFBlock(csfs::Vector{CSF})
-        parity, total2J = first(csfs).parity, first(csfs).total2J
-        @assert all(csf -> csf.parity == parity, csfs)
-        @assert all(csf -> csf.total2J == total2J, csfs)
-        new(csfs, AngularSymmetry(total2J // 2, parity))
+        angsym = first(csfs).angularsym
+        @assert all(csf -> csf.angularsym == angsym, csfs)
+        new(csfs, angsym)
     end
 end
 
-total2J(cb::CSFBlock) = cb.angularsym.angmom.twoj
+Base.length(cb::CSFBlock) = length(cb.csfs)
+
 parity(cb::CSFBlock) = parity(cb.angularsym)
+angularmomentum(cb::CSFBlock) = angularmomentum(cb.angularsym)
 
 function Base.push!(csfb::CSFBlock, csf::CSF)
-    @assert csf.total2J == total2J(csfb)
+    @assert csf.angularsym == csfb.angularsym
     push!(csfb.csfs, csf)
 end
 
@@ -105,7 +113,8 @@ function parse_rcsf(filename)
         line_peels = readline(io)
         line = readline(io); @assert strip(line) == "CSF(s):"
 
-        core_orbs = parse_cores(line_cores)
+        core_orbitals = parse_cores(line_cores)
+        core_couplings = AngularMomentum[0 for co in core_orbitals]
 
         blockid, csfid = 1, 1
         csfblocks = CSFBlock[]
@@ -120,15 +129,15 @@ function parse_rcsf(filename)
             line2 = strip(readline(io), ['\n', '\r'])
             line3 = strip(readline(io), ['\n', '\r'])
 
-            _total2J, _parity, orbs, coupled2Js = parse_csflines(line1, line2, line3)
+            total_j, parity_, orbitals, couplings = parse_csflines(line1, line2, line3)
             csf = CSF(
-                _total2J,
-                _parity,
-                vcat(core_orbs, orbs),
-                vcat(zeros(Int, length(core_orbs)), coupled2Js)
+                total_j,
+                parity_,
+                vcat(core_orbitals, orbitals),
+                vcat(core_couplings, couplings)
             )
 
-            if isempty(csfblocks) || total2J(last(csfblocks)) != _total2J || parity(last(csfblocks)).even_parity != _parity
+            if isempty(csfblocks) || angularmomentum(last(csfblocks)) != total_j || parity(last(csfblocks)) != parity_
                 push!(csfblocks, CSFBlock([csf]))
             else
                 push!(last(csfblocks), csf)
@@ -143,7 +152,7 @@ function parse_csflines(line1, line2, line3)
     @assert length(line1) % 9 == 0
 
     orbs = FilledOrbital[]
-    coupled2Js = Int[]
+    couplings = AngularMomentum[]
     for i = 1:div(length(line1), 9)
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
@@ -152,7 +161,7 @@ function parse_csflines(line1, line2, line3)
         nelec = parse(Int, orb[7:8])
 
         # pick out coupled angular momentum from the second line:
-        orb2J = (length(line2) >= 9*i) ? parse2J(line2[9*(i-1)+1:9*i]) : 0
+        angmom = (length(line2) >= 9*i) ? parse(AngularMomentum, line2[9*(i-1)+1:9*i]) : AngularMomentum(0)
 
         # Pick the J-coupling from between the orbitals (line3).
         # The items in that line are shifted by three characters for some reason.
@@ -160,15 +169,15 @@ function parse_csflines(line1, line2, line3)
             # TODO: Document this hack
             c2J_idx_first = 9*(i-1)+4
             c2J_idx_last = min(9*i+3, length(rstrip(line3))-1)
-            # TODO: I used the following subrange at one point to fix one bug it appears it
-            # created another one:
+            # TODO: I used the following subrange at one point to fix one bug, but it
+            # appears it created another one:
             #
             #     c2J_idx_first = 9*i+1
             #     c2J_idx_last  = min(9*(i+1), length(rstrip(line3))-1)
             #
             c2J_string = line3[c2J_idx_first:c2J_idx_last]
-            c2J = try
-                parse2J(c2J_string)
+            coupled_angmom = try
+                parse(AngularMomentum, c2J_string)
             catch e
                 error("""
                 Error parsing 2J value on line 3 (i=$i)
@@ -179,21 +188,21 @@ function parse_csflines(line1, line2, line3)
                 $(' '^(c2J_idx_first+2))^$('-'^(c2J_idx_last-c2J_idx_first-1))^
                 """)
             end
-            push!(coupled2Js, c2J)
+            push!(couplings, coupled_angmom)
         else
             @assert strip(line3[9*(i-1)+2:9*i+1]) |> isempty
             # TODO: following related to the TODO above
             #@assert strip(line3[9*i+1:9*(i+1)]) |> isempty
         end
 
-        push!(orbs, FilledOrbital(n, kappa, orb2J, nelec))
+        push!(orbs, FilledOrbital(n, kappa, nelec, angmom))
     end
 
     # Get the total angular momentum and parity
-    parity = parse_parity(last(strip(line3)))
-    total2J = last(coupled2Js)
+    parity = Parity(last(strip(line3)))
+    total_j = last(couplings)
 
-    total2J, parity, orbs, coupled2Js
+    total_j, parity, orbs, couplings
 end
 
 
@@ -218,11 +227,6 @@ function kappa2rso(kappa :: Integer)
     (kappa < 0) ? lstr : lstr*"-"
 end
 
-
-@deprecate parse2J(s) Int(parse(AngularMomentum, s).twoj)
-@deprecate parse_parity(c::Char) Parity(c).even_parity
-@deprecate parse_parity(s::AbstractString) parse(Parity, s).even_parity
-
 """
 Returns `(n, kappa)`.
 """
@@ -246,7 +250,7 @@ function parse_cores(line)
     orbs = FilledOrbital[]
     for os in orbstrings
         n, kappa = parse_orbital(os)
-        push!(orbs, FilledOrbital(n, kappa, 0, 2*abs(kappa)))
+        push!(orbs, FilledOrbital(n, kappa, 2*abs(kappa), 0))
     end
     orbs
 end
@@ -254,7 +258,7 @@ end
 # Base.print methods for the structs
 function Base.print(io::IO, orb::FilledOrbital)
     write(io, string(orb.n), kappa2rso(orb.kappa))
-    write(io, '(', string(orb.nelectrons), '~', string_2J(orb.total2J), ')')
+    write(io, '(', string(orb.nelectrons), '~', string(angularmomentum(orb)), ')')
     nothing
 end
 
@@ -265,9 +269,6 @@ function Base.print(io::IO, csf::CSF)
         print(io, orb)
         first = false
     end
-    write(io, " ~ ", string_2J(csf.total2J))
-    write(io, csf.parity ? '+' : '-')
+    write(io, " ~ ", string(csf.angularsym))
     nothing
 end
-
-string_2J(twoJ::Integer) = (twoJ%2==0) ? "$(div(twoJ, 2))" : "$(twoJ)/2"
