@@ -98,6 +98,8 @@ struct AngularMomentum
     end
 end
 
+Base.convert(::Type{AngularMomentum}, j::Union{Integer, Rational}) = AngularMomentum(j)
+
 """
     $(SIGNATURES)
 
@@ -137,9 +139,8 @@ Represents the angular symmetry (parity and angular momentum) of a state.
 struct AngularSymmetry
     angmom :: AngularMomentum
     parity :: Parity
-    AngularSymmetry(angmom::AngularMomentum, parity::Parity) = new(angmom, parity)
+    AngularSymmetry(angmom, parity::Parity) = new(angmom, parity)
 end
-AngularSymmetry(angmom, parity::Parity) = AngularSymmetry(AngularMomentum(angmom), parity)
 AngularSymmetry(angmom, parity) = AngularSymmetry(angmom, Parity(parity))
 
 angularmomentum(as::AngularSymmetry) = as.angmom
