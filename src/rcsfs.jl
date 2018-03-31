@@ -30,7 +30,7 @@ struct CSFBlock
         parity, total2J = first(csfs).parity, first(csfs).total2J
         @assert all(csf -> csf.parity == parity, csfs)
         @assert all(csf -> csf.total2J == total2J, csfs)
-        new(csfs, AngularSymmetry(total2J, parity))
+        new(csfs, AngularSymmetry(total2J // 2, parity))
     end
 end
 

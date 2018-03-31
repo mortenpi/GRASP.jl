@@ -77,15 +77,24 @@ function parity end
 """
 Represent integer and half-integer angular momentum values.
 
-Defined through the `2J` value.
+Use `Rational` values to define half-integer angular momenta.
 """
 struct AngularMomentum
     twoj :: UInt
-    function AngularMomentum(twoj :: Integer)
-        if twoj < 0
-            throw(ArgumentError("Angular momentum needs to be positive."))
+    function AngularMomentum(j::Union{Integer, Rational})
+        if j < zero(j)
+            throw(ArgumentError("Angular momentum can't be negative: $j"))
         end
-        new(twoj)
+
+        twoj = if denominator(j) == 1
+            2*numerator(j)
+        elseif denominator(j) == 2
+            numerator(j)
+        else
+            throw(ArgumentError("Angular momentum needs to be integer or half-integer: $j"))
+        end
+
+        return new(twoj)
     end
 end
 
@@ -97,16 +106,15 @@ fraction of the form `<x>/2`/ An empty string (also one including just whitespac
 into 0.
 """
 function Base.parse(::Type{AngularMomentum}, s::AbstractString)
-    twoj = if in('/', s)
+    if in('/', s)
         J_numerator, J_denominator = split(s, '/'; limit=2)
         @assert parse(Int, J_denominator) == 2
-        parse(Int, J_numerator)
+        AngularMomentum(parse(Int, J_numerator) // 2)
     elseif !isempty(strip(s))
-        2 * parse(Int, s)
+        AngularMomentum(parse(Int, s))
     else
-        0
+        AngularMomentum(0)
     end
-    return AngularMomentum(twoj)
 end
 
 Base.show(io::IO, am::AngularMomentum) = print(io, iseven(am.twoj) ? string(div(am.twoj, 2)) : "$(am.twoj)/2")
