@@ -10,12 +10,12 @@ include("rcsfs.jl")
 
 @testset "libgrasp" begin
     @test isfile("test-libgrasp")
-    @test isfile("graspfiles/rmix.out")
+    @test isfile("grasp/mixing/rmix.out")
 
     # This checks that the library has been successfully linked against an executable.
-    run(`./test-libgrasp graspfiles/rmix.out`)
+    run(`./test-libgrasp grasp/mixing/rmix.out`)
 
-    @test isa(GRASP.read_rmix("graspfiles/rmix.out"), GRASP.MixingFile)
+    @test isa(GRASP.read_rmix("grasp/mixing/rmix.out"), GRASP.MixingFile)
 end
 
 @testset "other" begin

@@ -66,10 +66,31 @@ import GRASP: parse_orbital
     @test parse_orbital("   1f-") ==  (1, 3)
 end
 
+import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
 @testset "parse_rcsf" begin
-    csfs = GRASP.parse_rcsf("graspfiles/rcsf.inp")
-    @test isa(csfs, Vector{GRASP.CSFBlock})
-    @test length(csfs) == 3
+    let csfs = GRASP.parse_rcsf("grasp/csls/example1.c")
+        @test isa(csfs, Vector{GRASP.CSFBlock})
+        @test length(csfs) == 4
+
+        @test parity(csfs[1]) == Symmetries.even
+        @test angularmomentum(csfs[1]) == AngularMomentum(0)
+
+        @test angularmomentum(csfs[2]) == AngularMomentum(1)
+        @test angularmomentum(csfs[3]) == AngularMomentum(2)
+        @test angularmomentum(csfs[4]) == AngularMomentum(3)
+    end
+
+    let csfs = GRASP.parse_rcsf("grasp/csls/example2.c")
+        @test isa(csfs, Vector{GRASP.CSFBlock})
+        @test length(csfs) == 4
+
+        @test parity(csfs[1]) == Symmetries.odd
+        @test angularmomentum(csfs[1]) == AngularMomentum(1//2)
+
+        @test angularmomentum(csfs[2]) == AngularMomentum(3//2)
+        @test angularmomentum(csfs[3]) == AngularMomentum(5//2)
+        @test angularmomentum(csfs[4]) == AngularMomentum(7//2)
+    end
 end
 
 end

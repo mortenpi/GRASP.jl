@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-cd ../test/graspfiles || exit 1
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd ${DIR}/../test/grasp/mixing || exit 1
 
 $GRASP2K/bin/rangular <<-EOF
 	y
