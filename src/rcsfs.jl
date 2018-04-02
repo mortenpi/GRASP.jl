@@ -310,10 +310,6 @@ function parse_orbital(s)
 end
 
 function parse_cores(line)
-    # Assuming NNNLL
-    @show length(line)
-    #@assert length(line) % 5 == 0
-
     orbstrings = split(line)
     orbs = RelativisticOrbital[]
     for os in orbstrings
