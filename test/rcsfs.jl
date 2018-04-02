@@ -7,15 +7,29 @@ import GRASP: RelativisticOrbital
 @testset "RelativisticOrbital" begin
     orbs = [
         RelativisticOrbital(1, -1), # 1s  / 1s(1/2)
+
         RelativisticOrbital(2, -1), # 2s  / 2s(1/2)
         RelativisticOrbital(2,  1), # 2p- / 2p(1/2)
         RelativisticOrbital(2, -2), # 2p  / 2p(3/2)
+
+        RelativisticOrbital(3, -1), # 3s  / 3s(1/2)
+        RelativisticOrbital(3,  1), # 3p- / 3p(1/2)
+        RelativisticOrbital(3, -2), # 3p  / 3p(3/2)
+        RelativisticOrbital(3,  2), # 3d- / 3d(3/2)
+        RelativisticOrbital(3, -3), # 3d  / 3d(5/2)
     ]
 
     @test string(orbs[1]) == "1s"
+
     @test string(orbs[2]) == "2s"
     @test string(orbs[3]) == "2p-"
     @test string(orbs[4]) == "2p"
+
+    @test string(orbs[5]) == "3s"
+    @test string(orbs[6]) == "3p-"
+    @test string(orbs[7]) == "3p"
+    @test string(orbs[8]) == "3d-"
+    @test string(orbs[9]) == "3d"
 
     for orb in orbs
         @test orb == orb
@@ -34,9 +48,16 @@ import GRASP: RelativisticOrbital
     @test orbs[1] <= orbs[2] <= orbs[3] <= orbs[4]
 
     @test GRASP.maxelectrons(orbs[1]) == 2
+
     @test GRASP.maxelectrons(orbs[2]) == 2
     @test GRASP.maxelectrons(orbs[3]) == 2
     @test GRASP.maxelectrons(orbs[4]) == 4
+
+    @test GRASP.maxelectrons(orbs[5]) == 2
+    @test GRASP.maxelectrons(orbs[6]) == 2
+    @test GRASP.maxelectrons(orbs[7]) == 4
+    @test GRASP.maxelectrons(orbs[8]) == 4
+    @test GRASP.maxelectrons(orbs[9]) == 6
 end
 
 import GRASP: CSF, Symmetries

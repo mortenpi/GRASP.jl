@@ -26,8 +26,13 @@ end
 angularmomentum(ro::RelativisticOrbital) = AngularMomentum(abs(ro.kappa))
 
 function Base.isless(ro1::RelativisticOrbital, ro2::RelativisticOrbital)
-    (ro1.n < ro2.n) || (abs(ro1.kappa) < abs(ro2.kappa)) ||
-        (abs(ro1.kappa) == abs(ro2.kappa) && ro1.kappa < ro2.kappa)
+    if ro1.n != ro2.n
+        return ro1.n < ro2.n
+    elseif abs(ro1.kappa) != abs(ro2.kappa)
+        return abs(ro1.kappa) < abs(ro2.kappa)
+    else
+        return ro1.kappa < ro2.kappa
+    end
 end
 
 function Base.print(io::IO, ro::RelativisticOrbital)
