@@ -11,6 +11,8 @@ using Base.Test
     @test isfile(joinpath(@__DIR__, "test-libgrasp"))
     @test isfile(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
 
+    @test_throws ErrorException GRASP.read_rmix("invalid-file.rmix")
+
     # This checks that the library has been successfully linked against an executable.
     test_libgrasp_script = joinpath(@__DIR__, "test-libgrasp")
     test_libgrasp_arg = joinpath(@__DIR__, "grasp/mixing/rmix.out")

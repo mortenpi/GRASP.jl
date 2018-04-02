@@ -33,6 +33,8 @@ end
 
 
 function read_rmix(filename)
+    isfile(filename) || error("Unable to open $(filename)")
+
     blockinfo = Ref{BlocksInfoF90}()
     blocks = Ref{Ptr{BlockF90}}()
     ccall( (:mixread, libgrasp_so),
