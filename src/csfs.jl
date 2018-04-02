@@ -177,3 +177,64 @@ function csfdefinition(csf::CSF)
     end
     return cd
 end
+
+const NUMBERS = [Char(48+i) for i=0:9]
+
+function Base.parse(::Type{CSFDefinition}, str)
+     # Find all the opening and closing parens first.
+    lparens, rparens = Int[], Int[]
+    for (i, c) in enumerate(str)
+        if c == '('
+            (length(lparens) == length(rparens)) || throw(ArgumentError("Unexpected '(' at $i in '$str'"))
+            push!(lparens, chr2ind(str, i))
+        elseif c == ')'
+            (length(lparens) - length(rparens) == 1) || throw(ArgumentError("Unexpected ')' at $i in '$str'"))
+            push!(rparens, chr2ind(str, i))
+        end
+    end
+    (length(lparens) == length(rparens)) || throw(ArgumentError("Missing final '(' in '$str'"))
+
+    cd = CSFDefinition()
+    for i = 1:length(lparens)
+        ss_idx = (i == 1) ? 1 : chr2ind(str, ind2chr(str, rparens[i-1]) + 1)
+        ss_end = chr2ind(str, ind2chr(str, lparens[i]) - 1)
+        ss_nl = str[ss_idx:ss_end]
+
+        ss_idx = chr2ind(str, ind2chr(str, lparens[i]) + 1)
+        ss_end = chr2ind(str, ind2chr(str, rparens[i]) - 1)
+        ss_el = str[ss_idx:ss_end]
+
+        # parse the n and l value
+        ss_nl = strip(ss_nl)
+
+        last_number = 0
+        for (i, c) in enumerate(ss_nl)
+            c in NUMBERS || break
+            last_number = i
+        end
+        last_number == 0 && throw(ArgumentError("Missing principal value in `$str`"))
+
+        ss_n = ss_nl[1:chr2ind(ss_nl, last_number)]
+        n = parse(Int, ss_n)
+
+        ss_l = ss_nl[chr2ind(ss_nl, last_number+1):end]
+        l = parse_l(ss_l)
+        l >= 0 || throw(ArgumentError("Bad spectroscopic orbital `$ss_l` in `$str`"))
+
+        # parse the electron / excitation counts
+        ss_el_split = split(ss_el, ',')
+        (1 <= length(ss_el_split) <= 2) || throw(ArgumentError("Bad number of terms in ss_el: $ss_el"))
+        nelec = parse(Int, ss_el_split[1])
+        nexc = if length(ss_el_split) == 1 || ss_el_split[2] == "i"
+            0
+        elseif ss_el_split[2] == "*"
+            nelec
+        else
+            parse(Int, ss_el_split[2])
+        end
+
+        push!(cd, CSFOrbital(n, l), nelec, nexc)
+    end
+
+    return cd
+end

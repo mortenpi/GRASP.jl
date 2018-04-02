@@ -86,4 +86,21 @@ import GRASP: csfdefinition, FilledOrbital, CSF
     @test nelectrons(csf) == nelectrons(csfdef)
 end
 
+@testset "parse(::CSFDefinition)" begin
+    csfdef = parse(CSFDefinition, "2s(2,2) 3p(3)")
+    @test isa(csfdef, CSFDefinition)
+    @test length(csfdef.orbitals) == 2
+    @test csfdef.orbitals[1] == CSFOrbital(2, 0)
+    @test csfdef.orbitals[2] == CSFOrbital(3, 1)
+    @test csfdef.nelectrons == [2, 3]
+    @test csfdef.nexcitations == [2, 0]
+
+    @test_throws ArgumentError parse(CSFDefinition, "2s(2)3p() 4p()")
+    @test_throws ArgumentError parse(CSFDefinition, "2s(2)3p() 4pÖ()")
+    @test_throws ArgumentError parse(CSFDefinition, "2s(2)3p() 4p a()")
+    @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖ()()")
+    @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖÖ(")
+    @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖÖ(())")
+end
+
 end # @testset "csfs.jl"
