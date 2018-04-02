@@ -70,11 +70,11 @@ import GRASP: CSF, Symmetries
 
     # CSF(total2J, parity, orbs, coupled2Js)
     csf1 = CSF([orb1, orb2], [2, 4], angmom, angmom, Symmetries.even)
-    @test string(csf1) == "1s(2~0) 3d-(4~0) ~ 0+"
+    @test string(csf1) == "1s(2|0|0) 3d-(4|0|0) | 0+"
     @test nelectrons(csf1) == 6
 
     csf2 = CSF([orb1, orb3], [2, 4], angmom, angmom, Symmetries.even)
-    @test string(csf2) == "1s(2~0) 4d(4~0) ~ 0+"
+    @test string(csf2) == "1s(2|0|0) 4d(4|0|0) | 0+"
     @test nelectrons(csf2) == 6
 
     @test nexcitations(csf1, csf1) == 0

@@ -143,6 +143,25 @@ function nexcitations(csf_from::CSF, csf_to::CSF)
     return nexcitations
 end
 
+function Base.show(io::IO, csf::CSF)
+    write(io, '"')
+    print(io, csf)
+    write(io, '"')
+end
+
+function Base.print(io::IO, csf::CSF)
+    first = true
+    for (orb, nelec, orbcoupling, csfcoupling) in csf
+        !first && write(io, ' ')
+        print(io, orb)
+        write(io, '(', string(nelec), '|', string(orbcoupling), '|', string(orbcoupling), ')')
+        first = false
+    end
+    write(io, " | ", string(csf.angularsym))
+    nothing
+end
+
+
 #
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
@@ -322,17 +341,4 @@ function parse_cores(line)
         push!(orbs, RelativisticOrbital(n, kappa))
     end
     orbs
-end
-
-# Base.print methods for the structs
-function Base.print(io::IO, csf::CSF)
-    first = true
-    for (orb, nelec, orbcoupling, csfcoupling) in csf
-        (! first) && write(io, ' ')
-        print(io, orb)
-        write(io, '(', string(nelec), '~', string(orbcoupling), ')')
-        first = false
-    end
-    write(io, " ~ ", string(csf.angularsym))
-    nothing
 end
