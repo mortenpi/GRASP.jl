@@ -3,24 +3,56 @@ using GRASP
 
 @testset "rcsfs.jl" begin
 
-import GRASP: FilledOrbital, CSF
+import GRASP: RelativisticOrbital
+@testset "RelativisticOrbital" begin
+    orbs = [
+        RelativisticOrbital(1, -1), # 1s  / 1s(1/2)
+        RelativisticOrbital(2, -1), # 2s  / 2s(1/2)
+        RelativisticOrbital(2,  1), # 2p- / 2p(1/2)
+        RelativisticOrbital(2, -2), # 2p  / 2p(3/2)
+    ]
+
+    @test string(orbs[1]) == "1s"
+    @test string(orbs[2]) == "2s"
+    @test string(orbs[3]) == "2p-"
+    @test string(orbs[4]) == "2p"
+
+    for orb in orbs
+        @test orb == orb
+    end
+
+    for i=1:length(orbs), j=(i+1):length(orbs)
+        a, b = orbs[i], orbs[j]
+        @test a != b
+        @test a < b
+        @test a <= b
+        @test b > a
+        @test b >= a
+    end
+
+    @test orbs[1] < orbs[2] < orbs[3] < orbs[4]
+    @test orbs[1] <= orbs[2] <= orbs[3] <= orbs[4]
+
+    @test GRASP.maxelectrons(orbs[1]) == 2
+    @test GRASP.maxelectrons(orbs[2]) == 2
+    @test GRASP.maxelectrons(orbs[3]) == 2
+    @test GRASP.maxelectrons(orbs[4]) == 4
+end
+
+import GRASP: CSF, Symmetries
 @testset "CSF" begin
-    # FilledOrbital(n, kappa, total2J, nelectrons)
-    orb1 = FilledOrbital(1, -1, 2, 0)
-    @test string(orb1) == "1s(2~0)"
+    orb1 = RelativisticOrbital(1, -1) # 1s  / 1s(1/2)
+    orb2 = RelativisticOrbital(3,  2) # 3d- / 3d(3/2)
+    orb3 = RelativisticOrbital(4, -3) # 4d  / 4d(5/2)
 
-    orb2 = FilledOrbital(3, 2, 4, 0)
-    @test string(orb2) == "3d-(4~0)"
-
-    orb3 = FilledOrbital(4, -3, 4, 0)
-    @test string(orb3) == "4d(4~0)"
+    angmom = Symmetries.AngularMomentum[0, 0]
 
     # CSF(total2J, parity, orbs, coupled2Js)
-    csf1 = CSF(0, true, [orb1, orb2], [0, 0])
+    csf1 = CSF([orb1, orb2], [2, 4], angmom, angmom, Symmetries.even)
     @test string(csf1) == "1s(2~0) 3d-(4~0) ~ 0+"
     @test nelectrons(csf1) == 6
 
-    csf2 = CSF(0, true, [orb1, orb3], [0, 0])
+    csf2 = CSF([orb1, orb3], [2, 4], angmom, angmom, Symmetries.even)
     @test string(csf2) == "1s(2~0) 4d(4~0) ~ 0+"
     @test nelectrons(csf2) == 6
 

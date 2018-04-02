@@ -62,7 +62,7 @@ end
 Base.done(cdef::CSFDefinition, i) = (i > length(cdef.orbitals))
 Base.next(cdef::CSFDefinition, i) = (cdef.orbitals[i], cdef.nelectrons[i], cdef.nexcitations[i]), i+1
 
-nelectrons(csf::CSFDefinition) = sum(csf.nelectrons)
+nelectrons(cdef::CSFDefinition) = sum(cdef.nelectrons)
 
 function nexcitations(csf_from::CSFDefinition, csf_to::CSFDefinition)
     @assert nelectrons(csf_from) == nelectrons(csf_to)
@@ -162,13 +162,13 @@ different `j` value.
 function csfdefinition(csf::CSF)
     nrelos = Vector{Tuple{Int,Int}}()
     nelecs = Dict{Tuple{Int,Int}, Int}()
-    for orb in csf.orbitals
+    for (orb, nelec, orbcoupling, csfcoupling) in csf
         nl = orb.n, kappa2l(orb.kappa)
         if !(nl in keys(nelecs))
             push!(nrelos, nl)
             nelecs[nl] = 0
         end
-        nelecs[nl] += orb.nelectrons
+        nelecs[nl] += nelec
     end
 
     cd = CSFDefinition()

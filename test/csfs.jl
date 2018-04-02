@@ -73,13 +73,13 @@ end
     # TODO: Test error for *?
 end
 
-import GRASP: csfdefinition, FilledOrbital, CSF
+import GRASP: csfdefinition, RelativisticOrbital, CSF, Symmetries, AngularMomentum
 @testset "csfdefinition()" begin
-    csf = let orbs = [
-            FilledOrbital(1, -1, 0, 2),
-            FilledOrbital(3, 2, 0, 4)
+    csf = let orbitals = [
+            RelativisticOrbital(1, -1),
+            RelativisticOrbital(3, 2)
         ]
-        CSF(0, true, orbs, [0, 0])
+        CSF(orbitals, [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
     end
 
     csfdef = csfdefinition(csf)
