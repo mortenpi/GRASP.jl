@@ -3,19 +3,23 @@ using Base.Test
 
 @testset "GRASP.jl" begin
 
-@testset "Symmetries" begin include("symmetries.jl") end
-
-include("csfs.jl")
-include("rcsfs.jl")
+@eval module SymmetriesTests include("symmetries.jl") end
+@eval module CSFSTests include("csfs.jl") end
+@eval module RCSFSTests include("rcsfs.jl") end
 
 @testset "libgrasp" begin
-    @test isfile("test-libgrasp")
-    @test isfile("grasp/mixing/rmix.out")
+    @test isfile(joinpath(@__DIR__, "test-libgrasp"))
+    @test isfile(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
 
     # This checks that the library has been successfully linked against an executable.
-    run(`./test-libgrasp grasp/mixing/rmix.out`)
+    test_libgrasp_script = joinpath(@__DIR__, "test-libgrasp")
+    test_libgrasp_arg = joinpath(@__DIR__, "grasp/mixing/rmix.out")
+    run(`$(test_libgrasp_script) $(test_libgrasp_arg)`)
 
-    @test isa(GRASP.read_rmix("grasp/mixing/rmix.out"), GRASP.MixingFile)
+    @test isa(
+        GRASP.read_rmix(joinpath(@__DIR__, "grasp/mixing/rmix.out")),
+        GRASP.MixingFile
+    )
 end
 
 @testset "other" begin

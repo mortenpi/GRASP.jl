@@ -1,6 +1,7 @@
-module SymmetriesTests
 using Base.Test
 using GRASP.Symmetries
+
+@testset "Symmetries" begin
 
 #
 # Parity
@@ -65,4 +66,4 @@ using GRASP.Symmetries
 @test string(AngularSymmetry(1, '-'))      == "1-"
 @test string(AngularSymmetry(3//2, '+'))   == "3/2+"
 
-end
+end # @testset "Symmetries"

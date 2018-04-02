@@ -68,7 +68,7 @@ end
 
 import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
 @testset "parse_rcsf" begin
-    let csfs = GRASP.parse_rcsf("grasp/csls/example1.c")
+    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example1.c"))
         @test isa(csfs, Vector{GRASP.CSFBlock})
         @test length(csfs) == 4
 
@@ -80,7 +80,7 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
         @test angularmomentum(csfs[4]) == AngularMomentum(3)
     end
 
-    let csfs = GRASP.parse_rcsf("grasp/csls/example2.c")
+    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example2.c"))
         @test isa(csfs, Vector{GRASP.CSFBlock})
         @test length(csfs) == 4
 
@@ -93,4 +93,4 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
     end
 end
 
-end
+end # @testset "rcsfs.jl"
