@@ -72,7 +72,7 @@ struct CSF
         let norbitals = length(orbitals)
             @assert length(electrons) == norbitals
             @assert length(couplings_orbitals) == norbitals
-            @assert length(couplings_orbitals) == norbitals
+            @assert length(couplings_csf) == norbitals
         end
         @assert issorted(orbitals)
         @assert all(x -> x!=0, electrons)
@@ -258,6 +258,11 @@ function parse_csflines(line1, line2, line3)
             end
             push!(orbs_csfcouplings, coupled_angmom)
         else
+            # We define the coupling of the first orbital to be the angular momentum of
+            # the (coupling of the electrons of) the orbital. Or, alternatively, the first
+            # orbital simply couples to J=0 (the angular momenum of a zero orbital CSF).
+            push!(orbs_csfcouplings, 0)
+            # The CSL file should not have anything (just spaces) in the first "slot".
             @assert strip(line3[9*(i-1)+2:9*i+1]) |> isempty
             # TODO: following related to the TODO above
             #@assert strip(line3[9*i+1:9*(i+1)]) |> isempty
