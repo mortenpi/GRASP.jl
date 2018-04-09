@@ -1,6 +1,5 @@
 module GRASP
 using DocStringExtensions
-import Humanize
 
 export nelectrons, nexcitations
 
@@ -48,6 +47,17 @@ include("rcsfs.jl")
 include("csfs.jl")
 include("rmix.jl")
 
+# Fixed Humanize.digitsep --- fixed for negative numbers
+# from: https://github.com/IainNZ/Humanize.jl
+function digitsep(value::Integer, sep = ",", k = 3)
+    isnegative = value < 0
+    value = string(abs(value))
+    n = length(value)
+    starts = reverse(collect(n:-k:1))
+    groups = [value[max(x-k+1, 1):x] for x in starts]
+    return (isnegative ? "-" : "") * join(groups, sep)
+end
+
 """
     $(SIGNATURES)
 
@@ -75,6 +85,6 @@ julia> GRASP.h2k_humanize(1.0)
 "219,475"
 ```
 """
-h2k_humanize(x) = Humanize.digitsep(round(Int, hartree2kayser(x)))
+h2k_humanize(x) = digitsep(round(Int, hartree2kayser(x)))
 
 end # module
