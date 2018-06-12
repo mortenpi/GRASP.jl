@@ -46,6 +46,7 @@ function nexcitations end
 include("rcsfs.jl")
 include("csfs.jl")
 include("rmix.jl")
+include("rwfn.jl")
 
 # Fixed Humanize.digitsep --- fixed for negative numbers
 # from: https://github.com/IainNZ/Humanize.jl

@@ -4,14 +4,19 @@ FC_FLAGS=-g -fPIC -std=f2008
 TEST_BINDIR=../test/binaries
 
 .PHONY: all
-all: libgrasp.so $(TEST_BINDIR)/test-libgrasp
+all: libgrasp.so \
+	$(TEST_BINDIR)/test-libgrasp \
+	$(TEST_BINDIR)/test-readrwfn
 
 src/mixread.o: src/g2k_c_binding.o
+src/rwfnread.o: src/g2k_c_binding.o
 
-libgrasp.so: src/mixread.o src/g2k_c_binding.o
+libgrasp.so: src/mixread.o src/rwfnread.o src/g2k_c_binding.o
 	$(FC) -shared -o $@ $^
 
-$(TEST_BINDIR)/test-libgrasp: test/libgrasp.o
+# Targets for test binaries.
+# Note: they have an implicit dependence on libgrasp.so
+$(TEST_BINDIR)/test-%: test/%.o
 	$(CXX) -o $@ $(CC_FLAGS) -Wl,-rpath,'$$ORIGIN/../../deps/' -L. $^ -lgrasp
 
 %.o: %.f90

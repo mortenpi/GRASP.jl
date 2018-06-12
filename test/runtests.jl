@@ -19,6 +19,11 @@ using Base.Test
         GRASP.MixingFile
     )
 
+    @test isa(
+        GRASP.read_rwfn(joinpath(@__DIR__, "grasp/mixing/rwfn.out")),
+        Vector{GRASP.RWFNOrbital}
+    )
+
     include("binaries/binaries.jl")
 end
 
