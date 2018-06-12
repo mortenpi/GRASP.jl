@@ -2,9 +2,9 @@
 *.jl.*.cov
 *.jl.mem
 
-test/test-libgrasp
+test/binaries/test-*
 deps/grasp-path.jl
-deps/*.o
+deps/*/*.o
 deps/*.so
 deps/*.mod
 

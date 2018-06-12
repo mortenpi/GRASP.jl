@@ -8,20 +8,18 @@ using Base.Test
 @eval module RCSFSTests include("rcsfs.jl") end
 
 @testset "libgrasp" begin
-    @test isfile(joinpath(@__DIR__, "test-libgrasp"))
+    # Make sure that all files exist
+    @test isfile(joinpath(@__DIR__, "binaries/test-libgrasp"))
     @test isfile(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
 
     @test_throws ErrorException GRASP.read_rmix("invalid-file.rmix")
-
-    # This checks that the library has been successfully linked against an executable.
-    test_libgrasp_script = joinpath(@__DIR__, "test-libgrasp")
-    test_libgrasp_arg = joinpath(@__DIR__, "grasp/mixing/rmix.out")
-    run(`$(test_libgrasp_script) $(test_libgrasp_arg)`)
 
     @test isa(
         GRASP.read_rmix(joinpath(@__DIR__, "grasp/mixing/rmix.out")),
         GRASP.MixingFile
     )
+
+    include("binaries/binaries.jl")
 end
 
 @testset "other" begin
