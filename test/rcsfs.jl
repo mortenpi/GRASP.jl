@@ -144,6 +144,19 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
         @test angularmomentum(csfs[3]) == AngularMomentum(5//2)
         @test angularmomentum(csfs[4]) == AngularMomentum(7//2)
     end
+
+    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example3.c"))
+        @test isa(csfs, Vector{GRASP.CSFBlock})
+        @test length(csfs) == 6
+
+        @test parity(csfs[1]) == Symmetries.even
+        @test angularmomentum(csfs[1]) == AngularMomentum(1//2)
+        @test angularmomentum(csfs[2]) == AngularMomentum(3//2)
+        @test angularmomentum(csfs[3]) == AngularMomentum(5//2)
+        @test angularmomentum(csfs[4]) == AngularMomentum(7//2)
+        @test angularmomentum(csfs[5]) == AngularMomentum(9//2)
+        @test angularmomentum(csfs[6]) == AngularMomentum(11//2)
+    end
 end
 
 end # @testset "rcsfs.jl"

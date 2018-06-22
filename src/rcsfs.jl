@@ -240,7 +240,8 @@ function parse_csflines(line1, line2, line3)
     orbs_nelectrons = Int[]
     orbs_orbcouplings = AngularMomentum[]
     orbs_csfcouplings = AngularMomentum[]
-    for i = 1:div(length(line1), 9)
+    norbitals = div(length(line1), 9) # number of orbitals in this group
+    for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
         n = parse(Int, orb[1:3])
@@ -251,46 +252,38 @@ function parse_csflines(line1, line2, line3)
         angmom = (length(line2) >= 9*i) ? parse(AngularMomentum, line2[9*(i-1)+1:9*i]) : AngularMomentum(0)
 
         # Pick the J-coupling from between the orbitals (line3).
-        # The items in that line are shifted by three characters for some reason.
-        if i > 1
-            # TODO: Document this hack
-            c2J_idx_first = 9*(i-1)+4
-            c2J_idx_last = min(9*i+3, length(rstrip(line3))-1)
-            # TODO: I used the following subrange at one point to fix one bug, but it
-            # appears it created another one:
-            #
-            #     c2J_idx_first = 9*i+1
-            #     c2J_idx_last  = min(9*(i+1), length(rstrip(line3))-1)
-            #
-            c2J_string = line3[c2J_idx_first:c2J_idx_last]
-            coupled_angmom = try
-                parse(AngularMomentum, c2J_string)
-            catch e
-                error("""
-                Error parsing 2J value on line 3 (i=$i)
-                  range $(c2J_idx_first):$(c2J_idx_last) -> '$(c2J_string)'
-                1: $(line1)
-                2: $(line2)
-                3: $(line3)
-                $(' '^(c2J_idx_first+2))^$('-'^(c2J_idx_last-c2J_idx_first-1))^
-                """)
-            end
-            push!(orbs_csfcouplings, coupled_angmom)
-        else
-            # We define the coupling of the first orbital to be the angular momentum of
-            # the (coupling of the electrons of) the orbital. Or, alternatively, the first
-            # orbital simply couples to J=0 (the angular momenum of a zero orbital CSF).
-            push!(orbs_csfcouplings, 0)
-            # The CSL file should not have anything (just spaces) in the first "slot".
-            @assert strip(line3[9*(i-1)+2:9*i+1]) |> isempty
-            # TODO: following related to the TODO above
-            #@assert strip(line3[9*i+1:9*(i+1)]) |> isempty
+        # The items in that line are shifted by three characters to the right for
+        # some reason.. except for the last one, which defines the J^P values of
+        # the CSF. That one is shifted by 1 character.. and then one after that
+        # is the parity +/- symbol.
+        c2J_idx_first, c2J_idx_last = if i < norbitals
+            # So, for the non-last ones we assume a 9 character block that has been
+            # shifted by 3 characters to the right.
+            # +1 to go from 0-based to 1-based
+            9*(i-1)+3+1, 9*i+3
+        else # i == norbitals -- the last non-regular coupling
+            9*(i-1)+3+1, 9*i+1
         end
+        c2J_string = line3[c2J_idx_first:c2J_idx_last]
+        coupled_angmom = try
+            parse(AngularMomentum, c2J_string)
+        catch e
+            error("""
+            Error parsing 2J value on line 3 (i=$i)
+              range $(c2J_idx_first):$(c2J_idx_last) -> '$(c2J_string)'
+            1: $(line1)
+            2: $(line2)
+            3: $(line3)
+            $(' '^(c2J_idx_first+2))^$('-'^(c2J_idx_last-c2J_idx_first-1))^
+            """)
+        end
+        push!(orbs_csfcouplings, coupled_angmom)
 
         push!(orbs, RelativisticOrbital(n, kappa))
         push!(orbs_nelectrons, nelec)
         push!(orbs_orbcouplings, angmom)
     end
+    @assert length(orbs_csfcouplings) == norbitals
 
     # Get the total angular momentum and parity
     parity = Parity(last(strip(line3)))
