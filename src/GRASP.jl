@@ -52,7 +52,7 @@ Return the maximum number of electrons.
 function maxelectrons end
 
 include("rcsfs.jl")
-include("csfs.jl")
+include("Configurations.jl")
 include("rmix.jl")
 include("rwfn.jl")
 

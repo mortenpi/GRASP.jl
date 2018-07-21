@@ -4,7 +4,7 @@ using Base.Test
 @testset "GRASP.jl" begin
 
 @eval module SymmetriesTests include("symmetries.jl") end
-@eval module CSFSTests include("csfs.jl") end
+@eval module CSFSTests include("Configurations.jl") end
 @eval module RCSFSTests include("rcsfs.jl") end
 
 @testset "libgrasp" begin

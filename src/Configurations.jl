@@ -1,4 +1,10 @@
-# Non-relativistic CSF definition lists -- to generate inputs for rcsfgenerate
+"""
+Non-relativistic configurations and CSF definition lists, for generating inputs
+to `rcsfgenerate`.
+"""
+module Configurations
+import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
+import ..GRASP: CSF, specname, kappa2l, parse_l
 
 struct CSFOrbital
     n :: Int
@@ -238,4 +244,6 @@ function Base.parse(::Type{CSFDefinition}, str)
     end
 
     return cd
+end
+
 end

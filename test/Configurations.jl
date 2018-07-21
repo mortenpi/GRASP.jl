@@ -1,6 +1,6 @@
 using Base.Test
 using GRASP
-import GRASP: CSFOrbital, CSFDefinition, CSFDefinitionList
+import GRASP.Configurations: CSFOrbital, CSFDefinition, CSFDefinitionList
 
 @testset "csfs.jl" begin
 
@@ -46,14 +46,14 @@ end
 @testset "CSFDefinition" begin
     cdef1 = let cdef = CSFDefinition()
         for n=1:3, l=0:(n-1)
-             push!(cdef, GRASP.CSFOrbital(n, l), 2*(2l+1), 0)
+             push!(cdef, CSFOrbital(n, l), 2*(2l+1), 0)
         end
         cdef
     end
 
     cdef2 = let cdef = CSFDefinition()
         for n=4:5, l=0:min(3, n-1)
-             push!(cdef, GRASP.CSFOrbital(n, l), 2*(2l+1), 0)
+             push!(cdef, CSFOrbital(n, l), 2*(2l+1), 0)
         end
         cdef
     end
@@ -67,11 +67,11 @@ end
 
     # Test `nexcitations(::CSFDefinition, ::CSFDefinition)`
     cdef3 = CSFDefinition()
-    push!(cdef3, GRASP.CSFOrbital(1, 0), 2, 0)
-    push!(cdef3, GRASP.CSFOrbital(2, 0), 2, 0)
+    push!(cdef3, CSFOrbital(1, 0), 2, 0)
+    push!(cdef3, CSFOrbital(2, 0), 2, 0)
     cdef4 = CSFDefinition()
-    push!(cdef4, GRASP.CSFOrbital(1, 0), 2, 0)
-    push!(cdef4, GRASP.CSFOrbital(2, 1), 2, 0)
+    push!(cdef4, CSFOrbital(1, 0), 2, 0)
+    push!(cdef4, CSFOrbital(2, 1), 2, 0)
 
     @test nexcitations(cdef3, cdef3) == 0
     @test nexcitations(cdef4, cdef4) == 0
@@ -80,7 +80,8 @@ end
     # TODO: Test error for *?
 end
 
-import GRASP: csfdefinition, RelativisticOrbital, CSF, Symmetries, AngularMomentum
+import GRASP.Configurations: csfdefinition
+import GRASP: RelativisticOrbital, CSF, Symmetries, AngularMomentum
 @testset "csfdefinition()" begin
     csf = let orbitals = [
             RelativisticOrbital(1, -1),
