@@ -47,6 +47,17 @@ import GRASP: RelativisticOrbital
     @test orbs[1] < orbs[2] < orbs[3] < orbs[4]
     @test orbs[1] <= orbs[2] <= orbs[3] <= orbs[4]
 
+    # angularmomentum(::RelativisticOrbital)
+    @test angularmomentum(orbs[1]) == GRASP.AngularMomentum(1//2)
+    @test angularmomentum(orbs[2]) == GRASP.AngularMomentum(1//2)
+    @test angularmomentum(orbs[3]) == GRASP.AngularMomentum(1//2)
+    @test angularmomentum(orbs[4]) == GRASP.AngularMomentum(3//2)
+    @test angularmomentum(orbs[5]) == GRASP.AngularMomentum(1//2)
+    @test angularmomentum(orbs[6]) == GRASP.AngularMomentum(1//2)
+    @test angularmomentum(orbs[7]) == GRASP.AngularMomentum(3//2)
+    @test angularmomentum(orbs[8]) == GRASP.AngularMomentum(3//2)
+    @test angularmomentum(orbs[9]) == GRASP.AngularMomentum(5//2)
+
     @test maxelectrons(orbs[1]) == 2
 
     @test maxelectrons(orbs[2]) == 2

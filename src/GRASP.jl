@@ -1,6 +1,7 @@
 module GRASP
 using DocStringExtensions
 
+export angularmomentum, parity # from module Symmetries
 export nelectrons, nexcitations, maxelectrons
 
 #

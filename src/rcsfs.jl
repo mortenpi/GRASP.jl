@@ -23,7 +23,7 @@ struct RelativisticOrbital
     end
 end
 
-angularmomentum(ro::RelativisticOrbital) = AngularMomentum(abs(ro.kappa))
+angularmomentum(ro::RelativisticOrbital) = AngularMomentum((2*abs(ro.kappa) - 1) // 2)
 
 function Base.isless(ro1::RelativisticOrbital, ro2::RelativisticOrbital)
     if ro1.n != ro2.n
