@@ -123,7 +123,7 @@ function nexcitations(csf_from::CSF, csf_to::CSF)
     # Let's count all the electrons that have been excited into some of
     # the occupied orbitals of csf_from.
     for (i, orb) in enumerate(csf_from.orbitals)
-        toids = find(o -> o.n == orb.n && o.kappa == orb.kappa, csf_to.orbitals)
+        toids = findall(o -> o.n == orb.n && o.kappa == orb.kappa, csf_to.orbitals)
         to_nelectrons = if length(toids) == 0
             0
         elseif length(toids) == 1
@@ -303,7 +303,13 @@ end
 # Helper functions for parsing
 # TODO: naming here requires more work..
 
-parse_l(lstring) = findfirst(ls -> ls == strip(lstring), SPECTROSCOPIC_NAMES) - 1
+function parse_l(lstring)
+    idx = findfirst(ls -> ls == strip(lstring), SPECTROSCOPIC_NAMES)
+    if idx === nothing
+        throw(ArgumentError("Unable to parse `$(lstring)`"))
+    end
+    return idx - 1
+end
 
 function parse_j(s)
     if endswith(s,"-")

@@ -38,14 +38,14 @@ function read_rmix(filename)
     blockinfo = Ref{BlocksInfoF90}()
     blocks = Ref{Ptr{BlockF90}}()
     ccall( (:mixread, libgrasp_so),
-        Void, (Cstring, Ref{BlocksInfoF90}, Ref{Ptr{BlockF90}}),
+        Cvoid, (Cstring, Ref{BlocksInfoF90}, Ref{Ptr{BlockF90}}),
         filename, blockinfo, blocks
     )
     blockinfo = blockinfo.x
-    blocks = unsafe_wrap(Array{BlockF90}, blocks.x, blockinfo.nblocks, true)
+    blocks = LCompat.unsafe_wrap(Array{BlockF90}, blocks.x, blockinfo.nblocks, own=true)
     blocks = map(blocks) do block
-        energies = unsafe_wrap(Array{Cdouble}, block.eigenenergies, (block.nevs,), true)
-        states = unsafe_wrap(Array{Cdouble}, block.eigenstates, (block.ncsfs, block.nevs), true)
+        energies = LCompat.unsafe_wrap(Array{Cdouble}, block.eigenenergies, (block.nevs,), own=true)
+        states = LCompat.unsafe_wrap(Array{Cdouble}, block.eigenstates, (block.ncsfs, block.nevs), own=true)
         MixingBlock(block.eav, energies, states, block)
     end
     MixingFile(blockinfo.nelectrons, blocks, blockinfo)

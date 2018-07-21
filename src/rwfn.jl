@@ -25,16 +25,16 @@ function read_rwfn(filename)
     orbitals = Ref{Ptr{OrbitalF90}}()
     norbitals = Ref{Cint}()
     ccall( (:rwfnread, libgrasp_so),
-        Void, (Cstring, Ref{Cint}, Ref{Ptr{OrbitalF90}}),
+        Cvoid, (Cstring, Ref{Cint}, Ref{Ptr{OrbitalF90}}),
         filename, norbitals, orbitals
     )
-    orbitals = unsafe_wrap(Array{OrbitalF90}, orbitals.x, norbitals.x, true)
+    orbitals = LCompat.unsafe_wrap(Array{OrbitalF90}, orbitals.x, norbitals.x, own=true)
     map(orbitals) do orb
         RWFNOrbital(
             orb.npy, orb.naky,
-            unsafe_wrap(Array{Cdouble}, orb.ra, (orb.my,), true),
-            unsafe_wrap(Array{Cdouble}, orb.pa, (orb.my,), true),
-            unsafe_wrap(Array{Cdouble}, orb.qa, (orb.my,), true),
+            LCompat.unsafe_wrap(Array{Cdouble}, orb.ra, (orb.my,), own=true),
+            LCompat.unsafe_wrap(Array{Cdouble}, orb.pa, (orb.my,), own=true),
+            LCompat.unsafe_wrap(Array{Cdouble}, orb.qa, (orb.my,), own=true),
             orb
         )
     end

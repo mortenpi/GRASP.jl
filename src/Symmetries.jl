@@ -52,11 +52,11 @@ end
 
 function Base.parse(::Type{Parity}, s::AbstractString)
     s = strip(s)
-    length(s) == 1 || throw(ParseError("Can't parse '$s' into Parity (bad length)."))
+    length(s) == 1 || throw(Meta.ParseError("Can't parse '$s' into Parity (bad length)."))
     try
         Parity(first(strip(s)))
     catch e
-        isa(e, ArgumentError) && throw(ParseError(e.msg))
+        isa(e, ArgumentError) && throw(Meta.ParseError(e.msg))
         rethrow()
     end
 end

@@ -1,5 +1,5 @@
+using Compat.Test
 using GRASP
-using Base.Test
 
 @testset "GRASP.jl" begin
 

@@ -1,4 +1,4 @@
-using Base.Test
+using Compat.Test
 using GRASP
 
 @testset "rcsfs.jl" begin

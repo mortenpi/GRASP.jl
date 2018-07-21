@@ -1,4 +1,4 @@
-using Base.Test
+using Compat.Test
 using GRASP.Symmetries
 
 @testset "Symmetries" begin
@@ -21,10 +21,10 @@ using GRASP.Symmetries
 @test parse(Parity, " + ") == Symmetries.even
 @test parse(Parity, "\t+") == Symmetries.even
 
-@test_throws ParseError parse(Parity, "")
-@test_throws ParseError parse(Parity, " ")
-@test_throws ParseError parse(Parity, "++")
-@test_throws ParseError parse(Parity, "α")
+@test_throws Meta.ParseError parse(Parity, "")
+@test_throws Meta.ParseError parse(Parity, " ")
+@test_throws Meta.ParseError parse(Parity, "++")
+@test_throws Meta.ParseError parse(Parity, "α")
 
 #
 # Angular momentum

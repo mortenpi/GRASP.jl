@@ -3,6 +3,8 @@ Non-relativistic configurations and CSF definition lists, for generating inputs
 to `rcsfgenerate`.
 """
 module Configurations
+using Compat
+
 import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
 import ..GRASP: CSF, specname, kappa2l, parse_l
 
@@ -86,7 +88,7 @@ function nexcitations(csf_from::CSFDefinition, csf_to::CSFDefinition)
     for (i, orb) in enumerate(csf_from.orbitals)
         # Let's count all the electrons that have been excited into some of
         # the occupied orbitals of csf_from.
-        toids = find(o -> o.n == orb.n && o.l == orb.l, csf_to.orbitals)
+        toids = findall(o -> o.n == orb.n && o.l == orb.l, csf_to.orbitals)
         @assert length(toids) < 2
         if length(toids) == 0
             nremoved += csf_from.nelectrons[i]
@@ -193,22 +195,22 @@ function Base.parse(::Type{CSFDefinition}, str)
     for (i, c) in enumerate(str)
         if c == '('
             (length(lparens) == length(rparens)) || throw(ArgumentError("Unexpected '(' at $i in '$str'"))
-            push!(lparens, chr2ind(str, i))
+            push!(lparens, nextind(str, 0, i))
         elseif c == ')'
             (length(lparens) - length(rparens) == 1) || throw(ArgumentError("Unexpected ')' at $i in '$str'"))
-            push!(rparens, chr2ind(str, i))
+            push!(rparens, nextind(str, 0, i))
         end
     end
     (length(lparens) == length(rparens)) || throw(ArgumentError("Missing final '(' in '$str'"))
 
     cd = CSFDefinition()
     for i = 1:length(lparens)
-        ss_idx = (i == 1) ? 1 : chr2ind(str, ind2chr(str, rparens[i-1]) + 1)
-        ss_end = chr2ind(str, ind2chr(str, lparens[i]) - 1)
+        ss_idx = (i == 1) ? 1 : nextind(str, 0, length(str, 1, rparens[i-1]) + 1)
+        ss_end = nextind(str, 0, length(str, 1, lparens[i]) - 1)
         ss_nl = str[ss_idx:ss_end]
 
-        ss_idx = chr2ind(str, ind2chr(str, lparens[i]) + 1)
-        ss_end = chr2ind(str, ind2chr(str, rparens[i]) - 1)
+        ss_idx = nextind(str, 0, length(str, 1, lparens[i]) + 1)
+        ss_end = nextind(str, 0, length(str, 1, rparens[i]) - 1)
         ss_el = str[ss_idx:ss_end]
 
         # parse the n and l value
@@ -221,10 +223,10 @@ function Base.parse(::Type{CSFDefinition}, str)
         end
         last_number == 0 && throw(ArgumentError("Missing principal value in `$str`"))
 
-        ss_n = ss_nl[1:chr2ind(ss_nl, last_number)]
+        ss_n = ss_nl[1:nextind(ss_nl, 0, last_number)]
         n = parse(Int, ss_n)
 
-        ss_l = ss_nl[chr2ind(ss_nl, last_number+1):end]
+        ss_l = ss_nl[nextind(ss_nl, 0, last_number+1):end]
         l = parse_l(ss_l)
         l >= 0 || throw(ArgumentError("Bad spectroscopic orbital `$ss_l` in `$str`"))
 
