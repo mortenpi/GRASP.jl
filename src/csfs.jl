@@ -27,6 +27,7 @@ function Base.print(io::IO, co::CSFOrbital)
     nothing
 end
 
+maxelectrons(co::CSFOrbital) = 4*co.l + 2
 
 struct CSFDefinition
     orbitals :: Vector{CSFOrbital}

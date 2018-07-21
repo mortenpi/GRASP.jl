@@ -1,7 +1,7 @@
 module GRASP
 using DocStringExtensions
 
-export nelectrons, nexcitations
+export nelectrons, nexcitations, maxelectrons
 
 #
 # Includes and imports related to compiled Fortran code.
@@ -42,6 +42,13 @@ function nelectrons end
 Calculate the number of excitations needed to go from `from` to `to`.
 """
 function nexcitations end
+
+"""
+    maxelectrons(obj)
+
+Return the maximum number of electrons.
+"""
+function maxelectrons end
 
 include("rcsfs.jl")
 include("csfs.jl")

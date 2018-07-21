@@ -34,6 +34,13 @@ end
 
     @test CSFOrbital(1,0) < CSFOrbital(2,0) <  CSFOrbital(2,1)
     @test CSFOrbital(1,0) < CSFOrbital(2,0) <= CSFOrbital(2,0)
+
+    @test maxelectrons(CSFOrbital(1,0)) == 2
+    @test maxelectrons(CSFOrbital(2,0)) == 2
+    @test maxelectrons(CSFOrbital(5,1)) == 6
+    @test maxelectrons(CSFOrbital(5,2)) == 10
+    @test maxelectrons(CSFOrbital(5,3)) == 14
+    @test maxelectrons(CSFOrbital(5,4)) == 18
 end
 
 @testset "CSFDefinition" begin

@@ -47,17 +47,17 @@ import GRASP: RelativisticOrbital
     @test orbs[1] < orbs[2] < orbs[3] < orbs[4]
     @test orbs[1] <= orbs[2] <= orbs[3] <= orbs[4]
 
-    @test GRASP.maxelectrons(orbs[1]) == 2
+    @test maxelectrons(orbs[1]) == 2
 
-    @test GRASP.maxelectrons(orbs[2]) == 2
-    @test GRASP.maxelectrons(orbs[3]) == 2
-    @test GRASP.maxelectrons(orbs[4]) == 4
+    @test maxelectrons(orbs[2]) == 2
+    @test maxelectrons(orbs[3]) == 2
+    @test maxelectrons(orbs[4]) == 4
 
-    @test GRASP.maxelectrons(orbs[5]) == 2
-    @test GRASP.maxelectrons(orbs[6]) == 2
-    @test GRASP.maxelectrons(orbs[7]) == 4
-    @test GRASP.maxelectrons(orbs[8]) == 4
-    @test GRASP.maxelectrons(orbs[9]) == 6
+    @test maxelectrons(orbs[5]) == 2
+    @test maxelectrons(orbs[6]) == 2
+    @test maxelectrons(orbs[7]) == 4
+    @test maxelectrons(orbs[8]) == 4
+    @test maxelectrons(orbs[9]) == 6
 end
 
 import GRASP: CSF, Symmetries
