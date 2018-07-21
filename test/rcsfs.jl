@@ -74,6 +74,7 @@ end
 import GRASP: CSF, Symmetries
 @testset "CSF" begin
     orb1 = RelativisticOrbital(1, -1) # 1s  / 1s(1/2)
+    orb1b = RelativisticOrbital(1, -1) # 1s  / 1s(1/2)
     orb2 = RelativisticOrbital(3,  2) # 3d- / 3d(3/2)
     orb3 = RelativisticOrbital(4, -3) # 4d  / 4d(5/2)
 
@@ -83,6 +84,9 @@ import GRASP: CSF, Symmetries
     csf1 = CSF([orb1, orb2], [2, 4], angmom, angmom, Symmetries.even)
     @test string(csf1) == "1s(2|0|0) 3d-(4|0|0) | 0+"
     @test nelectrons(csf1) == 6
+
+    csf1b = CSF([orb1b, orb2], [2, 4], angmom, angmom, Symmetries.even)
+    @test csf1 == csf1b
 
     csf2 = CSF([orb1, orb3], [2, 4], angmom, angmom, Symmetries.even)
     @test string(csf2) == "1s(2|0|0) 4d(4|0|0) | 0+"

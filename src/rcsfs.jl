@@ -83,6 +83,15 @@ struct CSF
     end
 end
 
+import Base: ==
+function ==(csf1::CSF, csf2::CSF)
+    (csf1.angularsym == csf2.angularsym)     &&
+    (csf1.orbitals == csf2.orbitals)         &&
+    (csf1.occupations == csf2.occupations)   &&
+    (csf1.orbcouplings == csf2.orbcouplings) &&
+    (csf1.csfcouplings == csf2.csfcouplings)
+end
+
 Base.start(csf::CSF) = 0
 Base.next(csf::CSF, s) = (csf.orbitals[s+1], csf.occupations[s+1], csf.orbcouplings[s+1], csf.csfcouplings[s+1]), s + 1
 Base.done(csf::CSF, s) = (s >= length(csf))
