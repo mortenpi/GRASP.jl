@@ -7,5 +7,6 @@ deps/grasp-path.jl
 deps/*/*.o
 deps/*.so
 deps/*.mod
+deps/build.log
 
 docs/build
