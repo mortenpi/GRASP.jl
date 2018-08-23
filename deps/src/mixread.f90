@@ -1,4 +1,4 @@
-subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
+function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     use, intrinsic :: iso_fortran_env, only: real64
     use, intrinsic :: iso_c_binding
     use g2k_c_binding
@@ -30,6 +30,7 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     type(c_ptr), intent(out) :: blocks_ptr
     type(block_t), pointer :: blocks(:)
     type(block_t) :: block
+    integer(c_int) :: mixread
 
     character(:), allocatable :: filename
 
@@ -46,14 +47,17 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, IOMSG=iom)
     if(ios /= 0) then
         print *, "ERROR: Unable to open file:", ios, iom
-        stop 1
+        mixread = 1
+        return
     endif
 
     ! Check header
     read(fhandle) g92mix
     if(g92mix /= "G92MIX") then
         print *, "ERROR: Bad header. Not a G92MIX file?"
-        stop 1
+        mixread = 2
+        close(fhandle)
+        return
     endif
 
     ! Read the global information of the mixing file (number of block etc.).
@@ -96,4 +100,7 @@ subroutine mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
 
     close(fhandle)
 
-end subroutine mixread
+    mixread = 0
+    return
+
+end function mixread

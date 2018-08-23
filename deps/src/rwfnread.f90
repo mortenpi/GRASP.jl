@@ -1,4 +1,4 @@
-subroutine rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
+function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     use, intrinsic :: iso_fortran_env, only: real64
     use, intrinsic :: iso_c_binding
     use g2k_c_binding
@@ -19,6 +19,7 @@ subroutine rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     character(kind=c_char), intent(in) :: filename_cstr(1)
     integer(c_int), intent(out) :: norbitals
     type(c_ptr), intent(out) :: orbitals_ptr
+    integer(c_int) :: rwfnread
 
     character(:), allocatable :: filename
 
@@ -36,14 +37,17 @@ subroutine rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, IOMSG=iom)
     if(ios /= 0) then
         print *, "ERROR: Unable to open file:", ios, iom
-        stop 1
+        rwfnread = 1
+        return
     endif
 
     ! Check header
     read(fhandle) g92rwf
     if(g92rwf /= "G92RWF") then
         print *, "ERROR: Bad header. Not a G92RWF file?"
-        stop 1
+        rwfnread = 2
+        close(fhandle)
+        return
     endif
 
     idx = 0 ! index of the current wavefunction
@@ -98,4 +102,4 @@ subroutine rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     orbitals_ptr = c_loc(orbitals_allocatable)
 
     close(fhandle)
-end subroutine rwfnread
+end function rwfnread

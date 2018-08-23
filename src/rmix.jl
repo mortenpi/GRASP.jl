@@ -37,10 +37,13 @@ function read_rmix(filename)
 
     blockinfo = Ref{BlocksInfoF90}()
     blocks = Ref{Ptr{BlockF90}}()
-    ccall( (:mixread, libgrasp_so),
-        Cvoid, (Cstring, Ref{BlocksInfoF90}, Ref{Ptr{BlockF90}}),
+    status = ccall( (:mixread, libgrasp_so),
+        Cint, (Cstring, Ref{BlocksInfoF90}, Ref{Ptr{BlockF90}}),
         filename, blockinfo, blocks
     )
+    if status != zero(status)
+        error("mixread returned with status $(status)")
+    end
     blockinfo = blockinfo.x
     blocks = LCompat.unsafe_wrap(Array{BlockF90}, blocks.x, blockinfo.nblocks, own=true)
     blocks = map(blocks) do block

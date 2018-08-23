@@ -24,10 +24,13 @@ function read_rwfn(filename)
 
     orbitals = Ref{Ptr{OrbitalF90}}()
     norbitals = Ref{Cint}()
-    ccall( (:rwfnread, libgrasp_so),
-        Cvoid, (Cstring, Ref{Cint}, Ref{Ptr{OrbitalF90}}),
+    status = ccall( (:rwfnread, libgrasp_so),
+        Cint, (Cstring, Ref{Cint}, Ref{Ptr{OrbitalF90}}),
         filename, norbitals, orbitals
     )
+    if status != zero(status)
+        error("rwfnread returned with status $(status)")
+    end
     orbitals = LCompat.unsafe_wrap(Array{OrbitalF90}, orbitals.x, norbitals.x, own=true)
     map(orbitals) do orb
         RWFNOrbital(
