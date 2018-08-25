@@ -24,6 +24,10 @@ using GRASP
         Vector{GRASP.RWFNOrbital}
     )
 
+    # make sure that existing, but invalid files throw gracefully
+    @test_throws ErrorException GRASP.read_rmix(joinpath(@__DIR__, "grasp/mixing/rwfn.out"))
+    @test_throws ErrorException GRASP.read_rwfn(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
+
     include("binaries/binaries.jl")
 end
 

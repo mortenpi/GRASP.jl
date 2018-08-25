@@ -26,6 +26,7 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     integer :: fhandle, ios
     character(255) :: iom
     character(6) :: g92rwf
+    integer :: errlineno = 0
 
     integer :: idx, i, npy, naky, my
     real(real64) :: pzy, ey
@@ -42,10 +43,10 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     endif
 
     ! Check header
-    read(fhandle) g92rwf
+    read(fhandle, iostat=ios, iomsg=iom) g92rwf
     if(g92rwf /= "G92RWF") then
         print *, "ERROR: Bad header. Not a G92RWF file?"
-        rwfnread = 2
+        rwfnread = 3
         close(fhandle)
         return
     endif
@@ -67,7 +68,9 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
         idx = idx + 1
         if(size(orbitals) < idx) then
             print '("ERROR: Hitting a hard-coded limit of ", i5, " orbitals.")', size(orbitals)
-            stop 1
+            rwfnread = 4
+            close(fhandle)
+            return
         endif
 
         orbitals(idx)%npy = npy
@@ -79,16 +82,10 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
 
         ! READ (23) PZY,(PA(I),I = 1,MY),(QA(I),I =1 ,MY)
         ! READ (23) (RA(I),I = 1,MY)
-        read(fhandle, iostat=ios) pzy, (pa(i), i = 1, orbitals(idx)%my), (qa(i), i = 1, orbitals(idx)%my)
-        if(ios /= 0) then
-            print *, "ERROR: Read #1 failed. Corrupt file?"
-            stop 1
-        endif
-        read(fhandle, iostat=ios) (ra(i), i = 1, orbitals(idx)%my)
-        if(ios /= 0) then
-            print *, "ERROR: Read #2 failed. Corrupt file?"
-            stop 1
-        endif
+        errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) pzy, (pa(i), i = 1, orbitals(idx)%my), (qa(i), i = 1, orbitals(idx)%my)
+        if(ios /= 0) go to 999
+        errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) (ra(i), i = 1, orbitals(idx)%my)
+        if(ios /= 0) go to 999
 
         orbitals(idx)%ra = c_loc(ra)
         orbitals(idx)%pa = c_loc(pa)
@@ -102,4 +99,16 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     orbitals_ptr = c_loc(orbitals_allocatable)
 
     close(fhandle)
+    return
+
+    ! Error handling for IO errors (reachable via goto)
+    999 continue
+    print '(a)', "Terminating rwfnread() with IO error."
+    print '(a,a,":",i0)', " at: ", __FILE__, errlineno
+    print '(" while reading: ",a)', filename
+    print *, ios, iom
+    close(fhandle)
+    rwfnread = 2
+    return
+
 end function rwfnread

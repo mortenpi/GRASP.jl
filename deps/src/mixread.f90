@@ -37,6 +37,7 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     integer :: fhandle, ios
     character(255) :: iom
     character(6) :: g92mix
+    integer :: errlineno = 0
 
     integer :: ib, nb, ncfblk, nevblk, iatjp, iaspa
 
@@ -44,7 +45,7 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     real(c_double), pointer :: eval(:), evec(:,:)
 
     filename = from_cstring(filename_cstr)
-    open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, IOMSG=iom)
+    open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, iomsg=iom)
     if(ios /= 0) then
         print *, "ERROR: Unable to open file:", ios, iom
         mixread = 1
@@ -52,11 +53,10 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     endif
 
     ! Check header
-    read(fhandle) g92mix
+    read(fhandle, iostat=ios, iomsg=iom) g92mix
     if(g92mix /= "G92MIX") then
-        print *, "ERROR: Bad header. Not a G92MIX file?"
-        mixread = 2
-        close(fhandle)
+        print *, "ERROR: Bad file header -- not a G92MIX file?"
+        mixread = 3
         return
     endif
 
@@ -65,8 +65,10 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
     !
     !     READ (nfmix) nelec, ncftot, nw, nvectot, nvecsiz, nblock
     !
-    read(fhandle) blockinfo%nelectrons, blockinfo%ncsfstotal, blockinfo%norbitals, &
+    errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) &
+        blockinfo%nelectrons, blockinfo%ncsfstotal, blockinfo%norbitals, &
         blockinfo%nvectotal, blockinfo%nvecsize, blockinfo%nblocks
+    if(ios /= 0) go to 999
 
     allocate(blocks(blockinfo%nblocks))
     blocks_ptr = c_loc(blocks)
@@ -75,7 +77,8 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
         ! ncfblk -- total number of CSFs in the block
         ! nevblk -- number of states in the block
         ! eav -- energy of the state
-        read(fhandle) nb, ncfblk, nevblk, blocks(ib)%iatjp, blocks(ib)%iaspa
+        read(fhandle, iostat=ios, iomsg=iom) nb, ncfblk, nevblk, blocks(ib)%iatjp, blocks(ib)%iaspa
+        if(ios /= 0) go to 999
 
         blocks(ib)%blockid = nb
         blocks(ib)%ncsfs = ncfblk
@@ -89,9 +92,12 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
         blocks(ib)%eigenstates = c_loc(evec)
         blocks(ib)%eigenenergies = c_loc(eval)
 
-        read(fhandle) (dummy_int, i = 1, nevblk)
-        read(fhandle) blocks(ib)%eav, (eval(i), i = 1, nevblk)
-        read(fhandle) ((evec(i,j), i = 1, ncfblk), j = 1, nevblk)
+        errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) (dummy_int, i = 1, nevblk)
+        if(ios /= 0) go to 999
+        errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) blocks(ib)%eav, (eval(i), i = 1, nevblk)
+        if(ios /= 0) go to 999
+        errlineno=__LINE__; read(fhandle, iostat=ios, iomsg=iom) ((evec(i,j), i = 1, ncfblk), j = 1, nevblk)
+        if(ios /= 0) go to 999
 
         do j = 1, nevblk
             eval(j) = blocks(ib)%eav + eval(j)
@@ -100,7 +106,17 @@ function mixread(filename_cstr, blockinfo, blocks_ptr) bind(c)
 
     close(fhandle)
 
-    mixread = 0
+    mixread = 0 ! no error
+    return
+
+    ! Error handling for IO errors (reachable via goto)
+    999 continue
+    print '(a)', "Terminating mixread() with IO error."
+    print '(a,a,":",i0)', " at: ", __FILE__, errlineno
+    print '(" while reading: ",a)', filename
+    print *, ios, iom
+    close(fhandle)
+    mixread = 2
     return
 
 end function mixread

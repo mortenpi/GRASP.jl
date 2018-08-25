@@ -16,7 +16,7 @@ struct orbitals_t {
     int my;
     double *pa, *qa, *ra;
 };
-extern "C" void rwfnread(const char *, int*, orbitals_t**);
+extern "C" int rwfnread(const char *, int*, orbitals_t**);
 
 #define COUT_MEMBER(s, f) cout << #s "." #f " = " << s.f << endl
 
@@ -31,7 +31,13 @@ int main(int argc, char * argv[]) {
 
     cout << "Reading orbitals from: " << argv[1] << endl;
     cout << "Calling: rwfnread" << endl;
-    rwfnread(argv[1], &norbitals, &orbitals);
+
+    int status = rwfnread(argv[1], &norbitals, &orbitals);
+
+    if(status != 0) {
+        cout << "rwfnread returned with status = " << status << endl;
+        return 1;
+    }
 
     cout << "Number of orbitals: " << norbitals << endl;
     for(int i = 0; i < norbitals; i++) {

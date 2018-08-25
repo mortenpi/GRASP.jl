@@ -10,7 +10,7 @@ struct block_t {
     double eav;
     double * eigenstates, * eigenenergies;
 };
-extern "C" void mixread(const char *, blocksinfo_t*, block_t**);
+extern "C" int mixread(const char *, blocksinfo_t*, block_t**);
 
 #define COUT_MEMBER(s, f) cout << #s "." #f " = " << s.f << endl
 
@@ -25,7 +25,12 @@ int main(int argc, char * argv[]) {
     int * ints;
 
     cout << "Reading state from: " << argv[1] << endl;
-    mixread(argv[1], &blocksinfo, &blocks);
+
+    int status = mixread(argv[1], &blocksinfo, &blocks);
+    if(status != 0) {
+        cout << "mixread returned with status = " << status << endl;
+        return 1;
+    }
 
     COUT_MEMBER(blocksinfo, nblocks);
     COUT_MEMBER(blocksinfo, nelectrons);

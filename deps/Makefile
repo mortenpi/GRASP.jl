@@ -1,5 +1,5 @@
 CC_FLAGS=-g
-FC_FLAGS=-g -fPIC -std=f2008
+FC_FLAGS=-g -fPIC -std=f2008 -cpp
 
 TEST_BINDIR=../test/binaries
 
