@@ -63,13 +63,12 @@ end
 
 Base.length(cdef::CSFDefinition) = length(cdef.orbitals)
 
-function Base.start(cdef::CSFDefinition)
-    # sanity check
-    @assert length(cdef.orbitals) == length(cdef.nelectrons) == length(cdef.nexcitations)
-    1
+function Base.iterate(cdef::CSFDefinition, s = 1)
+    @assert length(cdef.orbitals) == length(cdef.nelectrons) == length(cdef.nexcitations) # sanity check
+    s > length(cdef.orbitals) && return nothing
+    item = (cdef.orbitals[s], cdef.nelectrons[s], cdef.nexcitations[s])
+    return item, s + 1
 end
-Base.done(cdef::CSFDefinition, i) = (i > length(cdef.orbitals))
-Base.next(cdef::CSFDefinition, i) = (cdef.orbitals[i], cdef.nelectrons[i], cdef.nexcitations[i]), i+1
 
 nelectrons(cdef::CSFDefinition) = sum(cdef.nelectrons)
 

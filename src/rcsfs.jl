@@ -92,9 +92,12 @@ function ==(csf1::CSF, csf2::CSF)
     (csf1.csfcouplings == csf2.csfcouplings)
 end
 
-Base.start(csf::CSF) = 0
-Base.next(csf::CSF, s) = (csf.orbitals[s+1], csf.occupations[s+1], csf.orbcouplings[s+1], csf.csfcouplings[s+1]), s + 1
-Base.done(csf::CSF, s) = (s >= length(csf))
+function Base.iterate(csf::CSF, s=1)
+    s > length(csf) && return nothing
+    item = (csf.orbitals[s], csf.occupations[s], csf.orbcouplings[s], csf.csfcouplings[s])
+    return item, s + 1
+end
+
 Base.length(csf::CSF) = length(csf.orbitals)
 
 parity(csf::CSF) = parity(csf.angularsym)

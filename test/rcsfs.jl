@@ -95,6 +95,20 @@ import GRASP: CSF, Symmetries
     @test nexcitations(csf1, csf1) == 0
     @test nexcitations(csf2, csf2) == 0
     @test nexcitations(csf1, csf2) == 4
+
+    # Test the ::CSF iterator
+    @test length(csf1) == 2
+    let cs = collect(csf1), zero_angmom = Symmetries.AngularMomentum(0)
+        @test cs[1][1] == orb1
+        @test cs[1][2] == 2
+        @test cs[1][3] == zero_angmom
+        @test cs[1][4] == zero_angmom
+
+        @test cs[2][1] == orb2
+        @test cs[2][2] == 4
+        @test cs[2][3] == zero_angmom
+        @test cs[2][4] == zero_angmom
+    end
 end
 
 import GRASP: parse_l
