@@ -31,13 +31,13 @@ function read_rwfn(filename)
     if status != zero(status)
         error("rwfnread returned with status $(status)")
     end
-    orbitals = LCompat.unsafe_wrap(Array{OrbitalF90}, orbitals.x, norbitals.x, own=true)
+    orbitals = unsafe_wrap(Array{OrbitalF90}, orbitals.x, norbitals.x, own=true)
     map(orbitals) do orb
         RWFNOrbital(
             orb.npy, orb.naky,
-            LCompat.unsafe_wrap(Array{Cdouble}, orb.ra, (orb.my,), own=true),
-            LCompat.unsafe_wrap(Array{Cdouble}, orb.pa, (orb.my,), own=true),
-            LCompat.unsafe_wrap(Array{Cdouble}, orb.qa, (orb.my,), own=true),
+            unsafe_wrap(Array{Cdouble}, orb.ra, (orb.my,), own=true),
+            unsafe_wrap(Array{Cdouble}, orb.pa, (orb.my,), own=true),
+            unsafe_wrap(Array{Cdouble}, orb.qa, (orb.my,), own=true),
             orb
         )
     end

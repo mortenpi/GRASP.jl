@@ -3,7 +3,6 @@ Non-relativistic configurations and CSF definition lists, for generating inputs
 to `rcsfgenerate`.
 """
 module Configurations
-using Compat
 
 import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
 import ..GRASP: CSF, specname, kappa2l, parse_l

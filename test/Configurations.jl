@@ -1,4 +1,4 @@
-using Compat.Test
+using Test
 using GRASP
 import GRASP.Configurations: CSFOrbital, CSFDefinition, CSFDefinitionList
 

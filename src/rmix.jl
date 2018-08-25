@@ -45,10 +45,10 @@ function read_rmix(filename)
         error("mixread returned with status $(status)")
     end
     blockinfo = blockinfo.x
-    blocks = LCompat.unsafe_wrap(Array{BlockF90}, blocks.x, blockinfo.nblocks, own=true)
+    blocks = unsafe_wrap(Array{BlockF90}, blocks.x, blockinfo.nblocks, own=true)
     blocks = map(blocks) do block
-        energies = LCompat.unsafe_wrap(Array{Cdouble}, block.eigenenergies, (block.nevs,), own=true)
-        states = LCompat.unsafe_wrap(Array{Cdouble}, block.eigenstates, (block.ncsfs, block.nevs), own=true)
+        energies = unsafe_wrap(Array{Cdouble}, block.eigenenergies, (block.nevs,), own=true)
+        states = unsafe_wrap(Array{Cdouble}, block.eigenstates, (block.ncsfs, block.nevs), own=true)
         MixingBlock(block.eav, energies, states, block)
     end
     MixingFile(blockinfo.nelectrons, blocks, blockinfo)

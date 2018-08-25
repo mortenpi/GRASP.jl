@@ -1,17 +1,5 @@
 module GRASP
 using DocStringExtensions
-using Compat
-
-module LCompat
-    # Compat with https://github.com/JuliaLang/julia/pull/25647
-    if VERSION < v"0.7.0-DEV.3526"
-        unsafe_wrap(at::Union{Type{Array},Type{Array{T}},Type{Array{T,N}}}, p::Ptr{T}, dims::NTuple{N,Int}; own::Bool = false) where {T,N} = Base.unsafe_wrap(at, p, dims, own)
-        unsafe_wrap(at::Union{Type{Array},Type{Array{T}},Type{Array{T,1}}}, p::Ptr{T}, dims::Integer; own::Bool = false) where {T} = Base.unsafe_wrap(at, p, dims, own)
-        unsafe_wrap(at::Type, p::Ptr, dims::NTuple{N,<:Integer}; own::Bool = false) where {N} = Base.unsafe_wrap(at, p, dims, own)
-    else
-        import Base: unsafe_wrap
-    end
-end
 
 export angularmomentum, parity # from module Symmetries
 export nelectrons, nexcitations, maxelectrons
