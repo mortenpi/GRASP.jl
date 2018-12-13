@@ -38,6 +38,7 @@ using GRASP.Symmetries
 @test string(AngularMomentum(3//2))  == "3/2"
 @test string(AngularMomentum(5))     == "5"
 @test string(AngularMomentum(21//2)) == "21/2"
+@test string(AngularMomentum(40//4)) == "10"
 
 @test parse(AngularMomentum, "")     == AngularMomentum(0)
 @test parse(AngularMomentum, "  ")   == AngularMomentum(0)
@@ -48,6 +49,33 @@ using GRASP.Symmetries
 @test parse(AngularMomentum, "11/2") == AngularMomentum(11//2)
 @test parse(AngularMomentum, "10/2") == AngularMomentum(10//2)
 
+@test convert(Rational, AngularMomentum(0)) == 0//1
+@test convert(Rational, AngularMomentum(0)) == 0
+@test convert(Rational, AngularMomentum(22)) == 22
+@test convert(Rational, AngularMomentum(22)) == 22//1
+@test convert(Rational, AngularMomentum(1//2)) == 1//2
+
+@test AngularMomentum(0) + AngularMomentum(1//2) == AngularMomentum(1//2)
+@test AngularMomentum(1//2) + AngularMomentum(0) == AngularMomentum(1//2)
+@test AngularMomentum(1//2) + AngularMomentum(1//2) == AngularMomentum(1)
+@test AngularMomentum(1) + AngularMomentum(1//2) == AngularMomentum(3//2)
+@test AngularMomentum(9//2) + AngularMomentum(10) == AngularMomentum(29//2)
+
+@test absdiff(AngularMomentum(0), AngularMomentum(0)) == AngularMomentum(0)
+@test absdiff(AngularMomentum(0), AngularMomentum(5)) == AngularMomentum(5)
+@test absdiff(AngularMomentum(5), AngularMomentum(0)) == AngularMomentum(5)
+@test absdiff(AngularMomentum(1), AngularMomentum(1)) == AngularMomentum(0)
+@test absdiff(AngularMomentum(3//2), AngularMomentum(3//2)) == AngularMomentum(0)
+@test absdiff(AngularMomentum(1//2), AngularMomentum(5)) == AngularMomentum(9//2)
+
+@test AngularMomentum(0) < AngularMomentum(1//2)
+@test AngularMomentum(0) <= AngularMomentum(0)
+@test AngularMomentum(3//2) <= AngularMomentum(3//2)
+@test AngularMomentum(3//2) < AngularMomentum(2)
+@test AngularMomentum(3//2) <= AngularMomentum(2)
+@test !(AngularMomentum(3//2) < AngularMomentum(3//2))
+@test !(AngularMomentum(4//2) <= AngularMomentum(3//2))
+@test AngularMomentum(4//2) > AngularMomentum(3//2)
 
 #
 # Angular symmetries

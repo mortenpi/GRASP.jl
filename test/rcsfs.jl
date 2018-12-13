@@ -150,41 +150,56 @@ end
 
 import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
 @testset "parse_rcsf" begin
-    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example1.c"))
-        @test isa(csfs, Vector{GRASP.CSFBlock})
-        @test length(csfs) == 4
+    let csfbs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example1.c"))
+        @test isa(csfbs, Vector{GRASP.CSFBlock})
+        @test length(csfbs) == 4
 
-        @test parity(csfs[1]) == Symmetries.even
-        @test angularmomentum(csfs[1]) == AngularMomentum(0)
+        @test parity(csfbs[1]) == Symmetries.even
+        @test angularmomentum(csfbs[1]) == AngularMomentum(0)
 
-        @test angularmomentum(csfs[2]) == AngularMomentum(1)
-        @test angularmomentum(csfs[3]) == AngularMomentum(2)
-        @test angularmomentum(csfs[4]) == AngularMomentum(3)
+        @test angularmomentum(csfbs[2]) == AngularMomentum(1)
+        @test angularmomentum(csfbs[3]) == AngularMomentum(2)
+        @test angularmomentum(csfbs[4]) == AngularMomentum(3)
     end
 
-    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example2.c"))
-        @test isa(csfs, Vector{GRASP.CSFBlock})
-        @test length(csfs) == 4
+    let csfbs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example2.c"))
+        @test isa(csfbs, Vector{GRASP.CSFBlock})
+        @test length(csfbs) == 4
 
-        @test parity(csfs[1]) == Symmetries.odd
-        @test angularmomentum(csfs[1]) == AngularMomentum(1//2)
+        @test parity(csfbs[1]) == Symmetries.odd
+        @test angularmomentum(csfbs[1]) == AngularMomentum(1//2)
 
-        @test angularmomentum(csfs[2]) == AngularMomentum(3//2)
-        @test angularmomentum(csfs[3]) == AngularMomentum(5//2)
-        @test angularmomentum(csfs[4]) == AngularMomentum(7//2)
+        @test angularmomentum(csfbs[2]) == AngularMomentum(3//2)
+        @test angularmomentum(csfbs[3]) == AngularMomentum(5//2)
+        @test angularmomentum(csfbs[4]) == AngularMomentum(7//2)
+
+        # Test that we interpret the in-shell and inter-shell couplings correctly
+        let csf = csfbs[1].csfs[1]
+            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p(3|3/2|1/2) | 1/2-"
+            @test csf.csfcouplings[1] == AngularMomentum(1//2)
+            @test csf.csfcouplings[2] == AngularMomentum(1)
+            @test csf.csfcouplings[3] == AngularMomentum(1//2)
+        end
+        let csf = csfbs[1].csfs[5]
+            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p-(2|0|1) 2p(1|3/2|1/2) | 1/2-"
+            @test csf.csfcouplings[1] == AngularMomentum(1//2)
+            @test csf.csfcouplings[2] == AngularMomentum(1)
+            @test csf.csfcouplings[3] == AngularMomentum(1)
+            @test csf.csfcouplings[4] == AngularMomentum(1//2)
+        end
     end
 
-    let csfs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example3.c"))
-        @test isa(csfs, Vector{GRASP.CSFBlock})
-        @test length(csfs) == 6
+    let csfbs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example3.c"))
+        @test isa(csfbs, Vector{GRASP.CSFBlock})
+        @test length(csfbs) == 6
 
-        @test parity(csfs[1]) == Symmetries.even
-        @test angularmomentum(csfs[1]) == AngularMomentum(1//2)
-        @test angularmomentum(csfs[2]) == AngularMomentum(3//2)
-        @test angularmomentum(csfs[3]) == AngularMomentum(5//2)
-        @test angularmomentum(csfs[4]) == AngularMomentum(7//2)
-        @test angularmomentum(csfs[5]) == AngularMomentum(9//2)
-        @test angularmomentum(csfs[6]) == AngularMomentum(11//2)
+        @test parity(csfbs[1]) == Symmetries.even
+        @test angularmomentum(csfbs[1]) == AngularMomentum(1//2)
+        @test angularmomentum(csfbs[2]) == AngularMomentum(3//2)
+        @test angularmomentum(csfbs[3]) == AngularMomentum(5//2)
+        @test angularmomentum(csfbs[4]) == AngularMomentum(7//2)
+        @test angularmomentum(csfbs[5]) == AngularMomentum(9//2)
+        @test angularmomentum(csfbs[6]) == AngularMomentum(11//2)
     end
 end
 

@@ -166,7 +166,7 @@ function Base.print(io::IO, csf::CSF)
     for (orb, nelec, orbcoupling, csfcoupling) in csf
         !first && write(io, ' ')
         print(io, orb)
-        write(io, '(', string(nelec), '|', string(orbcoupling), '|', string(orbcoupling), ')')
+        write(io, '(', string(nelec), '|', string(orbcoupling), '|', string(csfcoupling), ')')
         first = false
     end
     write(io, " | ", string(csf.angularsym))
@@ -226,11 +226,62 @@ function parse_rcsf(filename)
             line3 = strip(readline(io), ['\n', '\r'])
 
             parity_, orbitals, noccupations, orbcouplings, csfcouplings = parse_csflines(line1, line2, line3)
+
+            @assert !any(isequal(0), noccupations) # we should never get 0-electron orbitals
+
+            # Fix orbcouplings that are not explicitly written in the CSL file (represented
+            # with nothings in the array). It is assumed that this is the case only if the
+            # orbital is fully occupied.
+            #
+            # NOTE: we could, though, also omit values if there is only 1 electron or
+            # maxelectrons(orb) - 1 electrons, this which case the angular momentum can
+            # only have only one value too.
+            for i = 1:length(orbitals)
+                orbital, nelec = orbitals[i], noccupations[i]
+                if orbcouplings[i] === nothing
+                    nelec == maxelectrons(orbital) || error("""
+                    Unable to fix missing orbital coupling.
+                      Orbital $i, orbital=$(repr(orbital)), nelec=$nelec
+                    1: $(line1)
+                    2: $(line2)
+                    3: $(line3)
+                    """)
+                    orbcouplings[i] = 0
+                elseif (nelec == 1 || nelec == maxelectrons(orbital) - 1) && orbcouplings[i] != angularmomentum(orbital)
+                    @warn "Bad orbital coupling" orbcouplings[i] nelec angularmomentum(orbital)
+                elseif orbcouplings[i] > nelec * angularmomentum(orbital)
+                    # If the orbital coupling is larger than (# particles) * (l of orbital),
+                    # then that has to be an error.
+                    @warn "Bad orbital coupling" orbcouplings[i] nelec angularmomentum(orbital)
+                end
+            end
+
+            # Fix csfcouplings which are not explicitly written to the CSL file. This appears
+            # to be the case for "trivial" zero couplings, if the previous CSF layer and
+            # current orbital are both zeros.
+            for i = 1:length(orbitals)
+                oj = orbcouplings[i]
+                cj = (i > 1) ? csfcouplings[i-1] : AngularMomentum(0)
+                Δupper, Δlower = oj+cj, absdiff(oj,cj)
+                if csfcouplings[i] === nothing
+                    Δupper == Δlower || error("""
+                    Unable to fix missing CSF coupling.
+                      Orbital $i, orbital=$(repr(orbitals[i])), oj=$(repr(oj)), cj=$(repr(cj))
+                    1: $(line1)
+                    2: $(line2)
+                    3: $(line3)
+                    """)
+                    csfcouplings[i] = Δlower
+                elseif !(Δlower <= csfcouplings[i] <= Δupper)
+                    @warn "Invalid csfcoupling value?" csfcouplings[i] Δupper Δlower
+                end
+            end
+
             csf = CSF(
                 vcat(core_orbitals, orbitals),
                 vcat(core_occupations, noccupations),
-                vcat(core_couplings, orbcouplings),
-                vcat(core_couplings, csfcouplings),
+                vcat(core_couplings, Vector{AngularMomentum}(orbcouplings)),
+                vcat(core_couplings, Vector{AngularMomentum}(csfcouplings)),
                 parity_,
             )
 
@@ -250,8 +301,8 @@ function parse_csflines(line1, line2, line3)
 
     orbs = RelativisticOrbital[]
     orbs_nelectrons = Int[]
-    orbs_orbcouplings = AngularMomentum[]
-    orbs_csfcouplings = AngularMomentum[]
+    orbs_orbcouplings = Union{AngularMomentum,Nothing}[]
+    orbs_csfcouplings = Union{AngularMomentum,Nothing}[]
     norbitals = div(length(line1), 9) # number of orbitals in this group
     for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
@@ -261,7 +312,11 @@ function parse_csflines(line1, line2, line3)
         nelec = parse(Int, orb[7:8])
 
         # pick out coupled angular momentum from the second line:
-        angmom = (length(line2) >= 9*i) ? parse(AngularMomentum, line2[9*(i-1)+1:9*i]) : AngularMomentum(0)
+        angmom =  if length(line2) < 9*i
+            nothing
+        else
+            parse_angmom_string(line2[9*(i-1)+1:9*i])
+        end
 
         # Pick the J-coupling from between the orbitals (line3).
         # The items in that line are shifted by three characters to the right for
@@ -278,7 +333,7 @@ function parse_csflines(line1, line2, line3)
         end
         c2J_string = line3[c2J_idx_first:c2J_idx_last]
         coupled_angmom = try
-            parse(AngularMomentum, c2J_string)
+            parse_angmom_string(c2J_string)
         catch e
             error("""
             Error parsing 2J value on line 3 (i=$i)
@@ -302,6 +357,10 @@ function parse_csflines(line1, line2, line3)
     parity, orbs, orbs_nelectrons, orbs_orbcouplings, orbs_csfcouplings
 end
 
+function parse_angmom_string(s)
+    length(strip(s)) == 0 && return nothing
+    parse(AngularMomentum, s)
+end
 
 # Helper functions for parsing
 # TODO: naming here requires more work..

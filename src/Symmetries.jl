@@ -8,6 +8,7 @@ using DocStringExtensions
 export Parity, parity
 export AngularMomentum, angularmomentum
 export AngularSymmetry
+export absdiff
 
 #
 # Parity
@@ -99,6 +100,18 @@ struct AngularMomentum
 end
 
 Base.convert(::Type{AngularMomentum}, j::Union{Integer, Rational}) = AngularMomentum(j)
+Base.convert(::Type{Rational}, am::AngularMomentum) = convert(Rational{Int}, am)
+Base.convert(::Type{Rational{Int}}, am::AngularMomentum) = Rational(Int(am.twoj), 2)
+
+import Base: +, *
++(a::AngularMomentum, b::AngularMomentum) = AngularMomentum(convert(Rational, a) + convert(Rational, b))
+function *(a::T, b::AngularMomentum) where {T <: Integer}
+    a < zero(T) && throw(ArgumentError("Can't multiply AngularMomentum with a negative number."))
+    AngularMomentum(a * b.twoj // 2)
+end
+absdiff(a::AngularMomentum, b::AngularMomentum) = AngularMomentum(abs(convert(Rational, a) - convert(Rational, b)))
+
+Base.isless(a::AngularMomentum, b::AngularMomentum) = (a.twoj < b.twoj)
 
 """
     $(SIGNATURES)
