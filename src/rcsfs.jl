@@ -57,8 +57,6 @@ end
 
 Base.length(csf::CSF) = length(csf.orbitals)
 
-angularmomentum(orb::Orbital) = AngularMomentum(orb.j)
-
 parity(csf::CSF) = parity(csf.angularsym)
 angularmomentum(csf::CSF) = angularmomentum(csf.angularsym)
 nelectrons(csf :: CSF) = sum(csf.occupations)

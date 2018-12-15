@@ -3,8 +3,6 @@ Types and methods related to parity.
 """
 module Symmetries
 
-using DocStringExtensions
-
 export Parity, parity
 export AngularMomentum, angularmomentum
 export AngularSymmetry
@@ -124,7 +122,7 @@ absdiff(a::AngularMomentum, b::AngularMomentum) = AngularMomentum(abs(convert(Ra
 Base.isless(a::AngularMomentum, b::AngularMomentum) = (a.twoj < b.twoj)
 
 """
-    $(SIGNATURES)
+    parse(::Type{AngularMomentum}, ::AbstractString)
 
 Parses the string `s` into the corresponding `2J`-value. String can either be a number or a
 fraction of the form `<x>/2`/ An empty string (also one including just whitespace) parses

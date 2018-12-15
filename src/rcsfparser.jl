@@ -33,6 +33,7 @@ function kappa(orb::Orbital{I,Rational{I}}) where {I}
     (orb.j < orb.ℓ ? 1 : -1) * I(orb.j + 1//2)
 end
 
+angularmomentum(orb::Orbital) = AngularMomentum(orb.j)
 angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
 
 #
@@ -178,7 +179,7 @@ function parse_csflines(line1, line2, line3)
     for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
-        orbital = AtomicLevels.orbital_from_string((orb[1:5]))
+        orbital = AtomicLevels.orbital_from_string(strip(orb[1:5]))
         # n = parse(Int, orb[1:3])
         # kappa = parse_j(orb[4:5])
         nelec = parse(Int, orb[7:8])
@@ -238,7 +239,7 @@ function parse_cores(line)
     orbstrings = split(line)
     orbs = Orbital{Int,Rational{Int}}[]
     for os in orbstrings
-        push!(orbs, AtomicLevels.orbital_from_string(os))
+        push!(orbs, AtomicLevels.orbital_from_string(strip(os)))
     end
     orbs
 end
