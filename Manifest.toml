@@ -4,7 +4,7 @@
 deps = ["BlockBandedMatrices", "Formatting", "Parameters", "Printf", "Random", "Test", "UnicodeFun", "WignerSymbols"]
 git-tree-sha1 = "d281c64d53c99ce285433c62bca4961aa0dc25cd"
 repo-rev = "revamp"
-repo-url = "git@github.com:jagot/AtomicLevels.jl.git"
+repo-url = "https://github.com/jagot/AtomicLevels.jl.git"
 uuid = "10933b4c-d60f-11e8-1fc6-bd9035a249a1"
 version = "0.1.0"
 
