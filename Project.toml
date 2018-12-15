@@ -1,0 +1,13 @@
+name = "GRASP"
+uuid = "06d77d2b-92b5-577c-9e61-ee8ac779e050"
+version = "0.0.0"
+
+[deps]
+AtomicLevels = "10933b4c-d60f-11e8-1fc6-bd9035a249a1"
+DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
