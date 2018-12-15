@@ -123,6 +123,8 @@ end
 
 Base.length(csf::CSF) = length(csf.orbitals)
 
+angularmomentum(orb::Orbital) = AngularMomentum(orb.j)
+
 parity(csf::CSF) = parity(csf.angularsym)
 angularmomentum(csf::CSF) = angularmomentum(csf.angularsym)
 nelectrons(csf :: CSF) = sum(csf.occupations)
@@ -201,24 +203,42 @@ end
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
 
+const AtLevCSF = AtomicLevels.CSF{Int,Rational{Int},Rational{Int}}
 struct CSFBlock
-    csfs :: Vector{CSF}
+    csfs :: Vector{AtLevCSF}
     angularsym :: AngularSymmetry
 
-    function CSFBlock(csfs::Vector{CSF})
-        angsym = first(csfs).angularsym
-        @assert all(csf -> csf.angularsym == angsym, csfs)
+    function CSFBlock(csfs::Vector{AtLevCSF})
+        csf = first(csfs)
+        angsym = angularsym(csf)
+        @assert all(csf -> angularsym(csf) == angsym, csfs)
         new(csfs, angsym)
     end
 end
+
+function angularsym(csf::AtomicLevels.CSF)
+     AngularSymmetry(angularmomentum(csf), Parity(AtomicLevels.parity(csf.config)))
+end
+
+function Symmetries.Parity(x::Integer)
+    if x == 1
+        return Parity(true)
+    elseif x == -1
+        return Parity(false)
+    else
+        throw(ArgumentError("Invalid numeric parity value $x."))
+    end
+end
+
+angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
 
 Base.length(cb::CSFBlock) = length(cb.csfs)
 
 parity(cb::CSFBlock) = parity(cb.angularsym)
 angularmomentum(cb::CSFBlock) = angularmomentum(cb.angularsym)
 
-function Base.push!(csfb::CSFBlock, csf::CSF)
-    @assert csf.angularsym == csfb.angularsym
+function Base.push!(csfb::CSFBlock, csf::AtLevCSF)
+    @assert angularsym(csf) == csfb.angularsym
     push!(csfb.csfs, csf)
 end
 
@@ -262,7 +282,7 @@ function parse_rcsf(filename)
             for i = 1:length(orbitals)
                 orbital, nelec = orbitals[i], noccupations[i]
                 if orbcouplings[i] === nothing
-                    nelec == maxelectrons(orbital) || error("""
+                    nelec == degeneracy(orbital) || error("""
                     Unable to fix missing orbital coupling.
                       Orbital $i, orbital=$(repr(orbital)), nelec=$nelec
                     1: $(line1)
@@ -270,7 +290,7 @@ function parse_rcsf(filename)
                     3: $(line3)
                     """)
                     orbcouplings[i] = 0
-                elseif (nelec == 1 || nelec == maxelectrons(orbital) - 1) && orbcouplings[i] != angularmomentum(orbital)
+                elseif (nelec == 1 || nelec == degeneracy(orbital) - 1) && orbcouplings[i] != angularmomentum(orbital)
                     @warn "Bad orbital coupling" orbcouplings[i] nelec angularmomentum(orbital)
                 elseif orbcouplings[i] > nelec * angularmomentum(orbital)
                     # If the orbital coupling is larger than (# particles) * (l of orbital),
@@ -300,13 +320,12 @@ function parse_rcsf(filename)
                 end
             end
 
-            csf = CSF(
-                vcat(core_orbitals, map(Orbital, orbitals)),
-                vcat(core_occupations, noccupations),
-                vcat(core_couplings, Vector{AngularMomentum}(orbcouplings)),
-                vcat(core_couplings, Vector{AngularMomentum}(csfcouplings)),
-                parity_,
-            )
+            config = AtomicLevels.Configuration(vcat(core_orbitals, orbitals), vcat(core_occupations, noccupations))
+            subshell_terms = map(x -> convert(Rational{Int}, x),
+                vcat(core_couplings, Vector{AngularMomentum}(orbcouplings)))
+            terms = map(x -> convert(Rational{Int}, x),
+                vcat(core_couplings, Vector{AngularMomentum}(csfcouplings)))
+            csf = AtomicLevels.CSF(config, subshell_terms, terms)
 
             if isempty(csfblocks) || angularmomentum(last(csfblocks)) != last(csfcouplings) || parity(last(csfblocks)) != parity_
                 push!(csfblocks, CSFBlock([csf]))
@@ -322,7 +341,7 @@ function parse_csflines(line1, line2, line3)
     # Assuming that the CSF line consists of NNNLL(EE) blocks, each 9 characters long.
     @assert length(line1) % 9 == 0
 
-    orbs = RelativisticOrbital[]
+    orbs = Orbital{Int,Rational{Int}}[]
     orbs_nelectrons = Int[]
     orbs_orbcouplings = Union{AngularMomentum,Nothing}[]
     orbs_csfcouplings = Union{AngularMomentum,Nothing}[]
@@ -330,8 +349,9 @@ function parse_csflines(line1, line2, line3)
     for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
-        n = parse(Int, orb[1:3])
-        kappa = parse_j(orb[4:5])
+        orbital = AtomicLevels.orbital_from_string((orb[1:5]))
+        # n = parse(Int, orb[1:3])
+        # kappa = parse_j(orb[4:5])
         nelec = parse(Int, orb[7:8])
 
         # pick out coupled angular momentum from the second line:
@@ -369,7 +389,7 @@ function parse_csflines(line1, line2, line3)
         end
         push!(orbs_csfcouplings, coupled_angmom)
 
-        push!(orbs, RelativisticOrbital(n, kappa))
+        push!(orbs, orbital)
         push!(orbs_nelectrons, nelec)
         push!(orbs_orbcouplings, angmom)
     end

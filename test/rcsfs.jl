@@ -176,17 +176,17 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
 
         # Test that we interpret the in-shell and inter-shell couplings correctly
         let csf = csfbs[1].csfs[1]
-            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p(3|3/2|1/2) | 1/2-"
-            @test csf.csfcouplings[1] == AngularMomentum(1//2)
-            @test csf.csfcouplings[2] == AngularMomentum(1)
-            @test csf.csfcouplings[3] == AngularMomentum(1//2)
+            #@test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p(3|3/2|1/2) | 1/2-"
+            @test csf.terms[1] == 1//2
+            @test csf.terms[2] == 1
+            @test csf.terms[3] == 1//2
         end
         let csf = csfbs[1].csfs[5]
-            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p⁻(2|0|1) 2p(1|3/2|1/2) | 1/2-"
-            @test csf.csfcouplings[1] == AngularMomentum(1//2)
-            @test csf.csfcouplings[2] == AngularMomentum(1)
-            @test csf.csfcouplings[3] == AngularMomentum(1)
-            @test csf.csfcouplings[4] == AngularMomentum(1//2)
+            #@test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p⁻(2|0|1) 2p(1|3/2|1/2) | 1/2-"
+            @test csf.terms[1] == 1//2
+            @test csf.terms[2] == 1
+            @test csf.terms[3] == 1
+            @test csf.terms[4] == 1//2
         end
     end
 
