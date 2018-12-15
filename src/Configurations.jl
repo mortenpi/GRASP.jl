@@ -5,7 +5,7 @@ to `rcsfgenerate`.
 module Configurations
 
 import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
-import ..GRASP: CSF, specname, kappa2l, parse_l
+import ..GRASP: SPECTROSCOPIC_NAMES, CSF, specname
 
 struct CSFOrbital
     n :: Int
@@ -244,6 +244,23 @@ function Base.parse(::Type{CSFDefinition}, str)
     end
 
     return cd
+end
+
+function parse_l(lstring)
+    idx = findfirst(ls -> ls == strip(lstring), SPECTROSCOPIC_NAMES)
+    if idx === nothing
+        throw(ArgumentError("Unable to parse `$(lstring)`"))
+    end
+    return idx - 1
+end
+
+function parse_j(s)
+    if endswith(s,"-")
+        @assert parse_l(s[1:end-1]) != 0
+        parse_l(s[1:end-1])
+    else
+        - parse_l(s) - 1
+    end
 end
 
 end

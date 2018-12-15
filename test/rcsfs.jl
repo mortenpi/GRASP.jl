@@ -54,24 +54,6 @@ import GRASP: CSF, Symmetries
     end
 end
 
-import GRASP: parse_l
-@testset "parse_l" begin
-    @test parse_l("s")   == 0
-    @test parse_l("s  ") == 0
-    @test parse_l("p")   == 1
-    @test parse_l("h")   == 5
-end
-
-import GRASP: parse_j
-@testset "parse_j" begin
-    @test parse_j("s")  == -1
-    @test parse_j("p-") ==  1
-    @test parse_j("p")  == -2
-    @test parse_j("d-") ==  2
-    @test parse_j("d")  == -3
-    @test parse_j("f-") ==  3
-end
-
 import GRASP: kappa2rso
 @testset "kappa2rso" begin
     @test kappa2rso(-1) == "s"

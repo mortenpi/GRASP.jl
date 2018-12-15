@@ -58,6 +58,7 @@ include("rcsfs.jl")
 include("Configurations.jl")
 include("rmix.jl")
 include("rwfn.jl")
+include("rcsfparser.jl")
 
 # Fixed Humanize.digitsep --- fixed for negative numbers
 # from: https://github.com/IainNZ/Humanize.jl
