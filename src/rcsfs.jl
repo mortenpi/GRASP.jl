@@ -1,48 +1,5 @@
 # Relativistic CSLs -- to parse rcsf.inp/out files.
 
-#
-# type RelativisticOrbital
-# ------------------------------------------------------------------------------------------
-"""
-    $(TYPEDEF)
-
-Represents the label of a relativistic orbitals `nl(j/2)`. Internally it is
-represented using the `n` and `kappa` values.
-
-`isless` implements the conventional ordering on the orbitals.
-"""
-struct RelativisticOrbital
-    n :: Int
-    kappa :: Int
-
-    function RelativisticOrbital(n, kappa)
-        @assert n >= 1
-        @assert kappa != 0
-        @assert kappa2l(kappa) < n
-        new(n, kappa)
-    end
-end
-
-angularmomentum(ro::RelativisticOrbital) = AngularMomentum((2*abs(ro.kappa) - 1) // 2)
-
-function Base.isless(ro1::RelativisticOrbital, ro2::RelativisticOrbital)
-    if ro1.n != ro2.n
-        return ro1.n < ro2.n
-    elseif abs(ro1.kappa) != abs(ro2.kappa)
-        return abs(ro1.kappa) < abs(ro2.kappa)
-    else
-        return ro1.kappa < ro2.kappa
-    end
-end
-
-function Base.print(io::IO, ro::RelativisticOrbital)
-    print(io, ro.n)
-    write(io, kappa2rso(ro.kappa))
-    nothing
-end
-
-maxelectrons(ro::RelativisticOrbital) = 2*abs(ro.kappa)
-
 """
     kappa_to_l(κ)
 
@@ -53,13 +10,6 @@ Note: κ and l values are always integers.
 function kappa_to_l(kappa::Integer)
     kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
     (kappa < 0) ? -(kappa+1) : kappa
-end
-
-function Orbital(gorb :: RelativisticOrbital)
-    n = gorb.n
-    l = kappa_to_l(gorb.kappa)
-    j = convert(Rational, angularmomentum(gorb))
-    Orbital(n, l, j)
 end
 
 function kappa(orb::Orbital{I,Rational{I}}) where {I}
@@ -75,7 +25,7 @@ end
 Represents a configuration state function.
 
 [`CSF`](@ref) is iterable, returning a tuple with the elements
-`(orbital::RelativisticOrbital, n_electrons, orbital_coupling, csf_coupling)` on each
+`(orbital::Orbital, n_electrons, orbital_coupling, csf_coupling)` on each
 iteration.
 """
 struct CSF

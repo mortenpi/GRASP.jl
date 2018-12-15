@@ -82,7 +82,7 @@ end
 end
 
 import GRASP.Configurations: csfdefinition
-import GRASP: RelativisticOrbital, CSF, Symmetries, AngularMomentum
+import GRASP: CSF, Symmetries, AngularMomentum
 @testset "csfdefinition()" begin
     csf = CSF([o"1s", o"3d-"], [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
 
