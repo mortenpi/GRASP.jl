@@ -1,5 +1,6 @@
 using Test
 using GRASP
+import AtomicLevels: @o_str, @c_str
 
 @testset "rcsfs.jl" begin
 
@@ -71,18 +72,28 @@ import GRASP: RelativisticOrbital
     @test maxelectrons(orbs[9]) == 6
 end
 
+@testset "kappa" begin
+    import GRASP: kappa
+    @test kappa(o"1s")  == -1
+    @test kappa(o"2s")  == -1
+    @test kappa(o"2p-") ==  1
+    @test kappa(o"2p")  == -2
+    @test kappa(o"3d-") ==  2
+    @test kappa(o"3d")  == -3
+end
+
 import GRASP: CSF, Symmetries
 @testset "CSF" begin
-    orb1 = RelativisticOrbital(1, -1) # 1s  / 1s(1/2)
-    orb1b = RelativisticOrbital(1, -1) # 1s  / 1s(1/2)
-    orb2 = RelativisticOrbital(3,  2) # 3d- / 3d(3/2)
-    orb3 = RelativisticOrbital(4, -3) # 4d  / 4d(5/2)
+    orb1 = o"1s"  # 1s(1/2)
+    orb1b = o"1s" # 1s(1/2)
+    orb2 = o"3d-" # 3d(3/2)
+    orb3 = o"4d"  # 4d(5/2)
 
     angmom = Symmetries.AngularMomentum[0, 0]
 
     # CSF(total2J, parity, orbs, coupled2Js)
     csf1 = CSF([orb1, orb2], [2, 4], angmom, angmom, Symmetries.even)
-    @test string(csf1) == "1s(2|0|0) 3d-(4|0|0) | 0+"
+    @test string(csf1) == "1s(2|0|0) 3d⁻(4|0|0) | 0+"
     @test nelectrons(csf1) == 6
 
     csf1b = CSF([orb1b, orb2], [2, 4], angmom, angmom, Symmetries.even)
@@ -138,16 +149,6 @@ import GRASP: kappa2rso
     @test kappa2rso(2)  == "d-"
 end
 
-import GRASP: parse_orbital
-@testset "parse_orbital" begin
-    @test parse_orbital("1s")  == (1, -1)
-    @test parse_orbital("2p-") ==  (2, 1)
-    @test parse_orbital("33p") == (33, -2)
-    @test parse_orbital("142d-") ==  (142, 2)
-    @test parse_orbital(" 124214  d") == (124214, -3) # Maybe should throw an error?
-    @test parse_orbital("   1f-") ==  (1, 3)
-end
-
 import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
 @testset "parse_rcsf" begin
     let csfbs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example1.c"))
@@ -181,7 +182,7 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
             @test csf.csfcouplings[3] == AngularMomentum(1//2)
         end
         let csf = csfbs[1].csfs[5]
-            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p-(2|0|1) 2p(1|3/2|1/2) | 1/2-"
+            @test string(csf) == "1s(1|1/2|1/2) 2s(1|1/2|1) 2p⁻(2|0|1) 2p(1|3/2|1/2) | 1/2-"
             @test csf.csfcouplings[1] == AngularMomentum(1//2)
             @test csf.csfcouplings[2] == AngularMomentum(1)
             @test csf.csfcouplings[3] == AngularMomentum(1)

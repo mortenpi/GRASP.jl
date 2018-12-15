@@ -170,7 +170,7 @@ function csfdefinition(csf::CSF)
     nrelos = Vector{Tuple{Int,Int}}()
     nelecs = Dict{Tuple{Int,Int}, Int}()
     for (orb, nelec, orbcoupling, csfcoupling) in csf
-        nl = orb.n, kappa2l(orb.kappa)
+        nl = orb.n, orb.ℓ
         if !(nl in keys(nelecs))
             push!(nrelos, nl)
             nelecs[nl] = 0

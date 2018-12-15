@@ -4,6 +4,9 @@ using DocStringExtensions
 export angularmomentum, parity # from module Symmetries
 export nelectrons, nexcitations, maxelectrons
 
+import AtomicLevels
+import AtomicLevels: Orbital, degeneracy
+
 #
 # Includes and imports related to compiled Fortran code.
 # ------------------------------------------------------------------------------------------

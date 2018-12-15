@@ -43,6 +43,29 @@ end
 
 maxelectrons(ro::RelativisticOrbital) = 2*abs(ro.kappa)
 
+"""
+    kappa_to_l(κ)
+
+Calculate the l quantum number corresponding to the κ quantum number.
+
+Note: κ and l values are always integers.
+"""
+function kappa_to_l(kappa::Integer)
+    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
+    (kappa < 0) ? -(kappa+1) : kappa
+end
+
+function Orbital(gorb :: RelativisticOrbital)
+    n = gorb.n
+    l = kappa_to_l(gorb.kappa)
+    j = convert(Rational, angularmomentum(gorb))
+    Orbital(n, l, j)
+end
+
+function kappa(orb::Orbital{I,Rational{I}}) where {I}
+    (orb.j < orb.ℓ ? 1 : -1) * I(orb.j + 1//2)
+end
+
 #
 # type CSF
 # ------------------------------------------------------------------------------------------
@@ -57,13 +80,13 @@ iteration.
 """
 struct CSF
     angularsym :: AngularSymmetry
-    orbitals :: Vector{RelativisticOrbital}
+    orbitals :: Vector{Orbital{Int,Rational{Int}}}
     occupations :: Vector{Int}
     orbcouplings :: Vector{AngularMomentum}
     csfcouplings :: Vector{AngularMomentum}
 
     function CSF(
-            orbitals::Vector{RelativisticOrbital},
+            orbitals::Vector{Orbital{Int,Rational{Int}}},
             electrons::Vector{Int},
             couplings_orbitals::Vector{AngularMomentum},
             couplings_csf::Vector{AngularMomentum},
@@ -112,8 +135,8 @@ number between `nl-` to `nl` counts as an excitation.
 """
 function nexcitations(csf_from::CSF, csf_to::CSF)
     @assert nelectrons(csf_from) == nelectrons(csf_to)
-    let from_orbs = [(i, orb.n, orb.kappa) for (i, orb) in enumerate(csf_from.orbitals)],
-        to_orbs = [(i, orb.n, orb.kappa) for (i, orb) in enumerate(csf_to.orbitals)]
+    let from_orbs = [(i, orb.n, kappa(orb)) for (i, orb) in enumerate(csf_from.orbitals)],
+        to_orbs = [(i, orb.n, kappa(orb)) for (i, orb) in enumerate(csf_to.orbitals)]
         @assert length(from_orbs) == length(unique(from_orbs))
         @assert length(to_orbs) == length(unique(to_orbs))
     end
@@ -126,7 +149,7 @@ function nexcitations(csf_from::CSF, csf_to::CSF)
     # Let's count all the electrons that have been excited into some of
     # the occupied orbitals of csf_from.
     for (i, orb) in enumerate(csf_from.orbitals)
-        toids = findall(o -> o.n == orb.n && o.kappa == orb.kappa, csf_to.orbitals)
+        toids = findall(o -> o.n == orb.n && kappa(o) == kappa(orb), csf_to.orbitals)
         to_nelectrons = if length(toids) == 0
             0
         elseif length(toids) == 1
@@ -210,7 +233,7 @@ function parse_rcsf(filename)
 
         core_orbitals = parse_cores(line_cores)
         core_couplings = AngularMomentum[0 for co in core_orbitals]
-        core_occupations = map(maxelectrons, core_orbitals)
+        core_occupations = map(degeneracy, core_orbitals)
 
         blockid, csfid = 1, 1
         csfblocks = CSFBlock[]
@@ -278,7 +301,7 @@ function parse_rcsf(filename)
             end
 
             csf = CSF(
-                vcat(core_orbitals, orbitals),
+                vcat(core_orbitals, map(Orbital, orbitals)),
                 vcat(core_occupations, noccupations),
                 vcat(core_couplings, Vector{AngularMomentum}(orbcouplings)),
                 vcat(core_couplings, Vector{AngularMomentum}(csfcouplings)),
@@ -389,26 +412,11 @@ function kappa2rso(kappa :: Integer)
     (kappa < 0) ? lstr : lstr*"-"
 end
 
-"""
-Returns `(n, kappa)`.
-"""
-function parse_orbital(s)
-    s = strip(s)
-    if endswith(s,"-")
-        l = parse_l(s[end-1:end-1])
-        @assert l != 0
-        parse(Int, s[1:end-2]), l
-    else
-        parse(Int, s[1:end-1]), -parse_l(s[end:end])-1
-    end
-end
-
 function parse_cores(line)
     orbstrings = split(line)
-    orbs = RelativisticOrbital[]
+    orbs = Orbital{Int,Rational{Int}}[]
     for os in orbstrings
-        n, kappa = parse_orbital(os)
-        push!(orbs, RelativisticOrbital(n, kappa))
+        push!(orbs, AtomicLevels.orbital_from_string(os))
     end
     orbs
 end
