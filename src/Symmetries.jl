@@ -51,6 +51,16 @@ function Parity(c::Char)
     end
 end
 
+function Symmetries.Parity(x::Integer)
+    if x == 1
+        return Parity(true)
+    elseif x == -1
+        return Parity(false)
+    else
+        throw(ArgumentError("Invalid numeric parity value $x."))
+    end
+end
+
 function Base.parse(::Type{Parity}, s::AbstractString)
     s = strip(s)
     length(s) == 1 || throw(Meta.ParseError("Can't parse '$s' into Parity (bad length)."))

@@ -1,20 +1,4 @@
-# Relativistic CSLs -- to parse rcsf.inp/out files.
-
-"""
-    kappa_to_l(κ)
-
-Calculate the l quantum number corresponding to the κ quantum number.
-
-Note: κ and l values are always integers.
-"""
-function kappa_to_l(kappa::Integer)
-    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
-    (kappa < 0) ? -(kappa+1) : kappa
-end
-
-function kappa(orb::Orbital{I,Rational{I}}) where {I}
-    (orb.j < orb.ℓ ? 1 : -1) * I(orb.j + 1//2)
-end
+# Relativistic CSFs
 
 #
 # type CSF
@@ -146,4 +130,9 @@ function Base.print(io::IO, csf::CSF)
     end
     write(io, " | ", string(csf.angularsym))
     nothing
+end
+
+function kappa2rso(kappa :: Integer)
+    lstr = specname(kappa_to_l(kappa))
+    (kappa < 0) ? lstr : lstr*"-"
 end

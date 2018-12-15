@@ -1,13 +1,51 @@
+# Relativistic CSLs and parsing of GRASP CSL files
+
+"""
+    kappa_to_l(κ)
+
+Calculate the _l_ quantum number corresponding to the _κ_ quantum number.
+
+Note: _κ_ and _l_ values are always integers.
+"""
+function kappa_to_l(kappa::Integer)
+    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
+    (kappa < 0) ? -(kappa+1) : kappa
+end
+
+"""
+    kappa_to_j(κ) :: Rational
+
+Calculate the _j_ quantum number corresponding to the _κ_ quantum number.
+
+Note: _κ_ is always an integer.
+"""
+function kappa_to_j(kappa::Integer)
+    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
+    abs(kappa) - 1//2
+end
+
+"""
+    kappa(::Orbital)
+
+Calculates the _κ_ quantum number of an orbital.
+"""
+function kappa(orb::Orbital{I,Rational{I}}) where {I}
+    (orb.j < orb.ℓ ? 1 : -1) * I(orb.j + 1//2)
+end
+
+angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
+
 #
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
 
-const AtLevCSF = AtomicLevels.CSF{Int,Rational{Int},Rational{Int}}
+const IntCSF = AtomicLevels.CSF{Int,Rational{Int},Rational{Int}}
+
 struct CSFBlock
-    csfs :: Vector{AtLevCSF}
+    csfs :: Vector{IntCSF}
     angularsym :: AngularSymmetry
 
-    function CSFBlock(csfs::Vector{AtLevCSF})
+    function CSFBlock(csfs::Vector{IntCSF})
         csf = first(csfs)
         angsym = angularsym(csf)
         @assert all(csf -> angularsym(csf) == angsym, csfs)
@@ -19,24 +57,12 @@ function angularsym(csf::AtomicLevels.CSF)
      AngularSymmetry(angularmomentum(csf), Parity(AtomicLevels.parity(csf.config)))
 end
 
-function Symmetries.Parity(x::Integer)
-    if x == 1
-        return Parity(true)
-    elseif x == -1
-        return Parity(false)
-    else
-        throw(ArgumentError("Invalid numeric parity value $x."))
-    end
-end
-
-angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
-
 Base.length(cb::CSFBlock) = length(cb.csfs)
 
 parity(cb::CSFBlock) = parity(cb.angularsym)
 angularmomentum(cb::CSFBlock) = angularmomentum(cb.angularsym)
 
-function Base.push!(csfb::CSFBlock, csf::AtLevCSF)
+function Base.push!(csfb::CSFBlock, csf::IntCSF)
     @assert angularsym(csf) == csfb.angularsym
     push!(csfb.csfs, csf)
 end
@@ -206,16 +232,6 @@ end
 function parse_angmom_string(s)
     length(strip(s)) == 0 && return nothing
     parse(AngularMomentum, s)
-end
-
-# Helper functions for parsing
-# TODO: naming here requires more work..
-
-kappa2l(kappa :: Integer) = (kappa < 0) ? -(kappa+1) : kappa
-
-function kappa2rso(kappa :: Integer)
-    lstr = specname(kappa2l(kappa))
-    (kappa < 0) ? lstr : lstr*"-"
 end
 
 function parse_cores(line)
