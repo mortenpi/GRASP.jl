@@ -1,9 +1,9 @@
-if !("GRASP2K" in keys(ENV))
-    error("\$GRASP2K environment variable not defined -- unable to determine the location of GRASP2K")
+if !("GRASP" in keys(ENV))
+    error("\$GRASP environment variable not defined -- unable to determine the location of GRASP")
 end
 
 open("grasp-path.jl", "w") do io
-    write(io, "const grasp2k = \"$(ENV["GRASP2K"])\"")
+    write(io, "const grasp = \"$(ENV["GRASP"])\"")
 end
 include("grasp-path.jl")
 

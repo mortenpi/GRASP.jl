@@ -15,11 +15,11 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gfortran-5
+      - gfortran-5 libblas-dev liblapack-dev
 install:
   - export FC="gfortran-5"
-  - ./.travis/getgrasp2k.sh
-  - source ${TRAVIS_BUILD_DIR}/../grasp2k/envset.sh
+  - deps/getgrasp.sh
+  - source deps/grasp/envset.sh
 
 
 ## uncomment and modify the following lines to manually install system packages

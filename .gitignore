@@ -10,3 +10,6 @@ deps/*.mod
 deps/build.log
 
 docs/build
+
+# Travis-specific
+deps/grasp/
