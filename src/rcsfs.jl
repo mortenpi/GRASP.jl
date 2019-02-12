@@ -20,7 +20,7 @@ struct CSF
     csfcouplings :: Vector{AngularMomentum}
 
     function CSF(
-            orbitals::Vector{Orbital{Int,Rational{Int}}},
+            orbitals::Vector{<:Orbital},
             electrons::Vector{Int},
             couplings_orbitals::Vector{AngularMomentum},
             couplings_csf::Vector{AngularMomentum},
