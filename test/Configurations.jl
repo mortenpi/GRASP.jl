@@ -1,7 +1,7 @@
 using Test
 using GRASP
 import GRASP.Configurations: CSFOrbital, CSFDefinition, CSFDefinitionList
-import AtomicLevels: @o_str, @c_str
+import AtomicLevels: @ro_str, @c_str
 
 @testset "csfs.jl" begin
 
@@ -84,7 +84,7 @@ end
 import GRASP.Configurations: csfdefinition
 import GRASP: CSF, Symmetries, AngularMomentum
 @testset "csfdefinition()" begin
-    csf = CSF([o"1s", o"3d-"], [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
+    csf = CSF([ro"1s", ro"3d-"], [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
 
     csfdef = csfdefinition(csf)
     @test nelectrons(csf) == nelectrons(csfdef)

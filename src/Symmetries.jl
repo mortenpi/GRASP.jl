@@ -8,6 +8,9 @@ export AngularMomentum, angularmomentum
 export AngularSymmetry
 export absdiff
 
+using AtomicLevels
+using WignerSymbols: HalfInteger
+
 #
 # Parity
 # ------------------------------------------------------------------------------------------
@@ -49,7 +52,7 @@ function Parity(c::Char)
     end
 end
 
-function Symmetries.Parity(x::Integer)
+function Parity(x::Integer)
     if x == 1
         return Parity(true)
     elseif x == -1
@@ -58,6 +61,8 @@ function Symmetries.Parity(x::Integer)
         throw(ArgumentError("Invalid numeric parity value $x."))
     end
 end
+
+Parity(x::AtomicLevels.Parity) = Parity(x.p)
 
 function Base.parse(::Type{Parity}, s::AbstractString)
     s = strip(s)
@@ -90,7 +95,7 @@ Use `Rational` values to define half-integer angular momenta.
 """
 struct AngularMomentum
     twoj :: UInt
-    function AngularMomentum(j::Union{Integer, Rational})
+    function AngularMomentum(j::Union{Integer, Rational, HalfInteger})
         if j < zero(j)
             throw(ArgumentError("Angular momentum can't be negative: $j"))
         end

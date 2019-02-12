@@ -14,13 +14,13 @@ iteration.
 """
 struct CSF
     angularsym :: AngularSymmetry
-    orbitals :: Vector{Orbital{Int,Rational{Int}}}
+    orbitals :: Vector{RelativisticOrbital{Int}}
     occupations :: Vector{Int}
     orbcouplings :: Vector{AngularMomentum}
     csfcouplings :: Vector{AngularMomentum}
 
     function CSF(
-            orbitals::Vector{<:Orbital},
+            orbitals::Vector{<:RelativisticOrbital},
             electrons::Vector{Int},
             couplings_orbitals::Vector{AngularMomentum},
             couplings_csf::Vector{AngularMomentum},

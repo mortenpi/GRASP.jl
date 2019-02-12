@@ -25,8 +25,10 @@ using GRASP
     )
 
     # make sure that existing, but invalid files throw gracefully
+    @info "Expected error output:"
     @test_throws ErrorException GRASP.read_rmix(joinpath(@__DIR__, "grasp/mixing/rwfn.out"))
     @test_throws ErrorException GRASP.read_rwfn(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
+    @info "End of expected error output."
 
     include("binaries/binaries.jl")
 end

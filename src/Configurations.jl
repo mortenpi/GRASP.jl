@@ -6,6 +6,7 @@ module Configurations
 
 import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
 import ..GRASP: SPECTROSCOPIC_NAMES, CSF, specname
+using AtomicLevels: kappa_to_ℓ
 
 struct CSFOrbital
     n :: Int
@@ -170,7 +171,7 @@ function csfdefinition(csf::CSF)
     nrelos = Vector{Tuple{Int,Int}}()
     nelecs = Dict{Tuple{Int,Int}, Int}()
     for (orb, nelec, orbcoupling, csfcoupling) in csf
-        nl = orb.n, orb.ℓ
+        nl = orb.n, kappa_to_ℓ(orb.κ)
         if !(nl in keys(nelecs))
             push!(nrelos, nl)
             nelecs[nl] = 0

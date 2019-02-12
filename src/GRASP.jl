@@ -5,7 +5,8 @@ export angularmomentum, parity # from module Symmetries
 export nelectrons, nexcitations, maxelectrons
 
 import AtomicLevels
-import AtomicLevels: Orbital, degeneracy
+using AtomicLevels: Orbital, RelativisticOrbital, degeneracy
+using WignerSymbols: HalfInteger
 
 #
 # Includes and imports related to compiled Fortran code.

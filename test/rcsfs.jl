@@ -1,25 +1,25 @@
 using Test
 using GRASP
-import AtomicLevels: @o_str, @c_str
+import AtomicLevels: @ro_str, @c_str
 
 @testset "rcsfs.jl" begin
 
 @testset "kappa" begin
     import GRASP: kappa
-    @test kappa(o"1s")  == -1
-    @test kappa(o"2s")  == -1
-    @test kappa(o"2p-") ==  1
-    @test kappa(o"2p")  == -2
-    @test kappa(o"3d-") ==  2
-    @test kappa(o"3d")  == -3
+    @test kappa(ro"1s")  == -1
+    @test kappa(ro"2s")  == -1
+    @test kappa(ro"2p-") ==  1
+    @test kappa(ro"2p")  == -2
+    @test kappa(ro"3d-") ==  2
+    @test kappa(ro"3d")  == -3
 end
 
 import GRASP: CSF, Symmetries
 @testset "CSF" begin
-    orb1 = o"1s"  # 1s(1/2)
-    orb1b = o"1s" # 1s(1/2)
-    orb2 = o"3d-" # 3d(3/2)
-    orb3 = o"4d"  # 4d(5/2)
+    orb1 = ro"1s"  # 1s(1/2)
+    orb1b = ro"1s" # 1s(1/2)
+    orb2 = ro"3d-" # 3d(3/2)
+    orb3 = ro"4d"  # 4d(5/2)
 
     angmom = Symmetries.AngularMomentum[0, 0]
 

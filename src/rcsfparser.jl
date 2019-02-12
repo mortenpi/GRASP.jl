@@ -29,18 +29,26 @@ end
 
 Calculates the _κ_ quantum number of an orbital.
 """
-function kappa(orb::Orbital{I,Rational{I}}) where {I}
-    (orb.j < orb.ℓ ? 1 : -1) * I(orb.j + 1//2)
+function kappa(orb::Orbital)
+    (orb.j < orb.ℓ ? 1 : -1) * T(orb.j + 1//2)
 end
 
+"""
+    kappa(::RelativisticOrbital)
+
+Calculates the _κ_ quantum number of an orbital.
+"""
+kappa(orb::RelativisticOrbital) = orb.κ
+
 angularmomentum(orb::Orbital) = AngularMomentum(orb.j)
+angularmomentum(orb::RelativisticOrbital) = AngularMomentum(AtomicLevels.kappa_to_j(orb.κ))
 angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
 
 #
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
 
-const IntCSF = AtomicLevels.CSF{Int,Rational{Int},Rational{Int}}
+const IntCSF = AtomicLevels.CSF{RelativisticOrbital{Int},HalfInteger,HalfInteger}
 
 struct CSFBlock
     csfs :: Vector{IntCSF}
@@ -171,7 +179,7 @@ function parse_csflines(line1, line2, line3)
     # Assuming that the CSF line consists of NNNLL(EE) blocks, each 9 characters long.
     @assert length(line1) % 9 == 0
 
-    orbs = Orbital{Int,Rational{Int}}[]
+    orbs = RelativisticOrbital{Int}[]
     orbs_nelectrons = Int[]
     orbs_orbcouplings = Union{AngularMomentum,Nothing}[]
     orbs_csfcouplings = Union{AngularMomentum,Nothing}[]
@@ -179,7 +187,7 @@ function parse_csflines(line1, line2, line3)
     for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
-        orbital = AtomicLevels.orbital_from_string(strip(orb[1:5]))
+        orbital = AtomicLevels.orbital_from_string(RelativisticOrbital, strip(orb[1:5]))
         # n = parse(Int, orb[1:3])
         # kappa = parse_j(orb[4:5])
         nelec = parse(Int, orb[7:8])
@@ -237,9 +245,9 @@ end
 
 function parse_cores(line)
     orbstrings = split(line)
-    orbs = Orbital{Int,Rational{Int}}[]
+    orbs = RelativisticOrbital{Int}[]
     for os in orbstrings
-        push!(orbs, AtomicLevels.orbital_from_string(strip(os)))
+        push!(orbs, AtomicLevels.orbital_from_string(RelativisticOrbital, strip(os)))
     end
     orbs
 end
