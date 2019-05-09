@@ -3,12 +3,13 @@ Types and methods related to parity.
 """
 module Symmetries
 
-using DocStringExtensions
-
 export Parity, parity
 export AngularMomentum, angularmomentum
 export AngularSymmetry
 export absdiff
+
+using AtomicLevels
+using WignerSymbols: HalfInteger
 
 #
 # Parity
@@ -51,6 +52,18 @@ function Parity(c::Char)
     end
 end
 
+function Parity(x::Integer)
+    if x == 1
+        return Parity(true)
+    elseif x == -1
+        return Parity(false)
+    else
+        throw(ArgumentError("Invalid numeric parity value $x."))
+    end
+end
+
+Parity(x::AtomicLevels.Parity) = Parity(x.p)
+
 function Base.parse(::Type{Parity}, s::AbstractString)
     s = strip(s)
     length(s) == 1 || throw(Meta.ParseError("Can't parse '$s' into Parity (bad length)."))
@@ -82,7 +95,7 @@ Use `Rational` values to define half-integer angular momenta.
 """
 struct AngularMomentum
     twoj :: UInt
-    function AngularMomentum(j::Union{Integer, Rational})
+    function AngularMomentum(j::Union{Integer, Rational, HalfInteger})
         if j < zero(j)
             throw(ArgumentError("Angular momentum can't be negative: $j"))
         end
@@ -114,7 +127,7 @@ absdiff(a::AngularMomentum, b::AngularMomentum) = AngularMomentum(abs(convert(Ra
 Base.isless(a::AngularMomentum, b::AngularMomentum) = (a.twoj < b.twoj)
 
 """
-    $(SIGNATURES)
+    parse(::Type{AngularMomentum}, ::AbstractString)
 
 Parses the string `s` into the corresponding `2J`-value. String can either be a number or a
 fraction of the form `<x>/2`/ An empty string (also one including just whitespace) parses

@@ -5,7 +5,8 @@ to `rcsfgenerate`.
 module Configurations
 
 import ..GRASP: angularmomentum, nelectrons, maxelectrons, nexcitations
-import ..GRASP: CSF, specname, kappa2l, parse_l
+import ..GRASP: SPECTROSCOPIC_NAMES, CSF, specname
+using AtomicLevels: kappa_to_ℓ
 
 struct CSFOrbital
     n :: Int
@@ -170,7 +171,7 @@ function csfdefinition(csf::CSF)
     nrelos = Vector{Tuple{Int,Int}}()
     nelecs = Dict{Tuple{Int,Int}, Int}()
     for (orb, nelec, orbcoupling, csfcoupling) in csf
-        nl = orb.n, kappa2l(orb.kappa)
+        nl = orb.n, kappa_to_ℓ(orb.κ)
         if !(nl in keys(nelecs))
             push!(nrelos, nl)
             nelecs[nl] = 0
@@ -244,6 +245,23 @@ function Base.parse(::Type{CSFDefinition}, str)
     end
 
     return cd
+end
+
+function parse_l(lstring)
+    idx = findfirst(ls -> ls == strip(lstring), SPECTROSCOPIC_NAMES)
+    if idx === nothing
+        throw(ArgumentError("Unable to parse `$(lstring)`"))
+    end
+    return idx - 1
+end
+
+function parse_j(s)
+    if endswith(s,"-")
+        @assert parse_l(s[1:end-1]) != 0
+        parse_l(s[1:end-1])
+    else
+        - parse_l(s) - 1
+    end
 end
 
 end

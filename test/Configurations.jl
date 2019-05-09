@@ -1,6 +1,7 @@
 using Test
 using GRASP
 import GRASP.Configurations: CSFOrbital, CSFDefinition, CSFDefinitionList
+import AtomicLevels: @ro_str, @c_str
 
 @testset "csfs.jl" begin
 
@@ -81,14 +82,9 @@ end
 end
 
 import GRASP.Configurations: csfdefinition
-import GRASP: RelativisticOrbital, CSF, Symmetries, AngularMomentum
+import GRASP: CSF, Symmetries, AngularMomentum
 @testset "csfdefinition()" begin
-    csf = let orbitals = [
-            RelativisticOrbital(1, -1),
-            RelativisticOrbital(3, 2)
-        ]
-        CSF(orbitals, [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
-    end
+    csf = CSF([ro"1s", ro"3d-"], [2, 4], AngularMomentum[0, 0], AngularMomentum[0, 0], Symmetries.even)
 
     csfdef = csfdefinition(csf)
     @test nelectrons(csf) == nelectrons(csfdef)
@@ -109,6 +105,24 @@ end
     @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖ()()")
     @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖÖ(")
     @test_throws ArgumentError parse(CSFDefinition, "2s 3pÖÖ(())")
+end
+
+import GRASP.Configurations: parse_l
+@testset "parse_l" begin
+    @test parse_l("s")   == 0
+    @test parse_l("s  ") == 0
+    @test parse_l("p")   == 1
+    @test parse_l("h")   == 5
+end
+
+import GRASP.Configurations: parse_j
+@testset "parse_j" begin
+    @test parse_j("s")  == -1
+    @test parse_j("p-") ==  1
+    @test parse_j("p")  == -2
+    @test parse_j("d-") ==  2
+    @test parse_j("d")  == -3
+    @test parse_j("f-") ==  3
 end
 
 end # @testset "csfs.jl"

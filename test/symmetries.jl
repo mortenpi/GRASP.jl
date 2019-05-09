@@ -13,6 +13,12 @@ using GRASP.Symmetries
 @test Parity('-') == Symmetries.odd
 @test_throws ArgumentError Parity(' ')
 
+@test Parity(1) == Symmetries.even
+@test Parity(-1) == Symmetries.odd
+@test_throws ArgumentError Parity(0)
+@test_throws ArgumentError Parity(-2)
+@test_throws ArgumentError Parity(42)
+
 @test string(Symmetries.even) == "+"
 @test string(Symmetries.odd)  == "-"
 

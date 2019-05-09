@@ -4,6 +4,10 @@ using DocStringExtensions
 export angularmomentum, parity # from module Symmetries
 export nelectrons, nexcitations, maxelectrons
 
+import AtomicLevels
+using AtomicLevels: Orbital, RelativisticOrbital, degeneracy
+using WignerSymbols: HalfInteger
+
 #
 # Includes and imports related to compiled Fortran code.
 # ------------------------------------------------------------------------------------------
@@ -55,6 +59,7 @@ include("rcsfs.jl")
 include("Configurations.jl")
 include("rmix.jl")
 include("rwfn.jl")
+include("rcsfparser.jl")
 
 # Fixed Humanize.digitsep --- fixed for negative numbers
 # from: https://github.com/IainNZ/Humanize.jl
