@@ -6,7 +6,7 @@ export nelectrons, nexcitations, maxelectrons
 
 import AtomicLevels
 using AtomicLevels: Orbital, RelativisticOrbital, degeneracy
-using WignerSymbols: HalfInteger
+using HalfIntegers: HalfInt
 
 #
 # Includes and imports related to compiled Fortran code.

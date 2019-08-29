@@ -9,7 +9,7 @@ export AngularSymmetry
 export absdiff
 
 using AtomicLevels
-using WignerSymbols: HalfInteger
+using HalfIntegers: HalfInt
 
 #
 # Parity
@@ -95,7 +95,7 @@ Use `Rational` values to define half-integer angular momenta.
 """
 struct AngularMomentum
     twoj :: UInt
-    function AngularMomentum(j::Union{Integer, Rational, HalfInteger})
+    function AngularMomentum(j::Union{Integer, Rational, HalfInt})
         if j < zero(j)
             throw(ArgumentError("Angular momentum can't be negative: $j"))
         end

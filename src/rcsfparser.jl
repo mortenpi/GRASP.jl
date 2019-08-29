@@ -48,7 +48,7 @@ angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
 
-const IntCSF = AtomicLevels.CSF{RelativisticOrbital{Int},HalfInteger,HalfInteger}
+const IntCSF = AtomicLevels.CSF{RelativisticOrbital{Int},HalfInt,HalfInt}
 
 struct CSFBlock
     csfs :: Vector{IntCSF}
