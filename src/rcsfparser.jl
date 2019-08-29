@@ -182,6 +182,7 @@ function parse_csflines(line1, line2, line3)
     orbs = RelativisticOrbital{Int}[]
     orbs_nelectrons = Int[]
     orbs_orbcouplings = Union{AngularMomentum,Nothing}[]
+    orbs_orbseniority = Union{Int,Nothing}[]
     orbs_csfcouplings = Union{AngularMomentum,Nothing}[]
     norbitals = div(length(line1), 9) # number of orbitals in this group
     for i = 1:norbitals
@@ -192,11 +193,30 @@ function parse_csflines(line1, line2, line3)
         # kappa = parse_j(orb[4:5])
         nelec = parse(Int, orb[7:8])
 
-        # pick out coupled angular momentum from the second line:
-        angmom =  if length(line2) < 9*i
-            nothing
+        # Pick out the subshell angular momenta and seniority numbers from the second line.
+        # It seems that second line also comes in 9-character blocks aligned with the
+        # the first line:
+        #
+        # Line 1: NNNLL(AA)
+        # Line 2: SSSS;JJJJ
+        #
+        # where
+        #  - NNN: principal quantum number
+        #  - LL: orbital angular momentum (e.g. `s `, `p-`)
+        #  - AA: number of electrons on the orbital
+        #  - SSSS: seniority number
+        #  - JJJJ: total angular momentum of the subshell (either integer or half-integer
+        #    with / separating the numerator and denominator -- `JJ/2`)
+        #
+        # If it is trivially zero, the whole string will be empty. If the seniority number
+        # is trivial, the `SSSS;` part will be omitted (including the `;`).
+        angmom, seniority =  if length(line2) < 9*i
+            nothing, nothing
+        elseif line2[9*(i-1)+5] == ';'
+            # seniority number present
+            parse_angmom_string(line2[9*(i-1)+6:9*i]), parse(Int, line2[9*(i-1)+1:9*(i-1)+4])
         else
-            parse_angmom_string(line2[9*(i-1)+1:9*i])
+            parse_angmom_string(line2[9*(i-1)+1:9*i]), nothing
         end
 
         # Pick the J-coupling from between the orbitals (line3).
@@ -230,6 +250,7 @@ function parse_csflines(line1, line2, line3)
         push!(orbs, orbital)
         push!(orbs_nelectrons, nelec)
         push!(orbs_orbcouplings, angmom)
+        push!(orbs_orbseniority, seniority)
     end
     @assert length(orbs_csfcouplings) == norbitals
 

@@ -116,6 +116,38 @@ import GRASP: Symmetries, AngularMomentum, angularmomentum, parity
         @test angularmomentum(csfbs[5]) == AngularMomentum(9//2)
         @test angularmomentum(csfbs[6]) == AngularMomentum(11//2)
     end
+
+    # example4.c generated with:
+    #
+    #   * ! Orbital order
+    #             4  ! Selected core
+    #   4f(4,*)
+    #   *
+    #   4s,4p,4d,4f
+    #             0          50  ! Lower and higher 2*J
+    #             0  ! Number of excitations
+    #   n
+    let csfbs = GRASP.parse_rcsf(joinpath(@__DIR__, "grasp/csls/example4.c"))
+        @test isa(csfbs, Vector{GRASP.CSFBlock})
+        @test length(csfbs) == 11
+
+        @test parity(csfbs[1]) == Symmetries.even
+        @test angularmomentum(csfbs[1])  == AngularMomentum(0)
+        @test angularmomentum(csfbs[2])  == AngularMomentum(1)
+        @test angularmomentum(csfbs[3])  == AngularMomentum(2)
+        @test angularmomentum(csfbs[4])  == AngularMomentum(3)
+        @test angularmomentum(csfbs[5])  == AngularMomentum(4)
+        @test angularmomentum(csfbs[6])  == AngularMomentum(5)
+        @test angularmomentum(csfbs[7])  == AngularMomentum(6)
+        @test angularmomentum(csfbs[8])  == AngularMomentum(7)
+        @test angularmomentum(csfbs[9])  == AngularMomentum(8)
+        @test angularmomentum(csfbs[10]) == AngularMomentum(9)
+        @test angularmomentum(csfbs[11]) == AngularMomentum(10)
+
+        # The 3rd block (J=2) contains seniority numbers. But we don't actually
+        # parse store them at the moment.
+        @test length(csfbs[3].csfs) == 17
+    end
 end
 
 end # @testset "rcsfs.jl"
