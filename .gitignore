@@ -8,6 +8,7 @@ deps/*/*.o
 deps/*.so
 deps/*.mod
 deps/build.log
+deps/build_options.log
 
 docs/build
 
