@@ -10,5 +10,6 @@ if [ -e "${DIR}/grasp" ]; then
 fi
 
 git clone https://github.com/mortenpi/grasp.git grasp || exit
-cd grasp/ && ./configure.sh && cd build/ || exit
+cd grasp/ && git checkout mp/libgrasp2 || exit
+./configure.sh && cd build/ || exit
 make && make install || exit

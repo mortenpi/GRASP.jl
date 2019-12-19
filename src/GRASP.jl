@@ -17,6 +17,9 @@ let grasp_path_file = joinpath(dirname(@__FILE__), "../deps/grasp-path.jl")
     include(grasp_path_file)
 end
 
+const libgraspjl_so = joinpath(dirname(@__FILE__), "..", "deps", "libgraspjl.so")
+isfile(libgraspjl_so) || error("$(libgrasp_so) does not exist. Run `Pkg.build(\"GRASP\")`.")
+
 const libgrasp_so = joinpath(dirname(@__FILE__), "..", "deps", "libgrasp.so")
 isfile(libgrasp_so) || error("$(libgrasp_so) does not exist. Run `Pkg.build(\"GRASP\")`.")
 

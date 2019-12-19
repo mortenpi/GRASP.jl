@@ -37,7 +37,7 @@ function read_rmix(filename)
 
     blockinfo = Ref{BlocksInfoF90}()
     blocks = Ref{Ptr{BlockF90}}()
-    status = ccall( (:mixread, libgrasp_so),
+    status = ccall( (:mixread, libgraspjl_so),
         Cint, (Cstring, Ref{BlocksInfoF90}, Ref{Ptr{BlockF90}}),
         filename, blockinfo, blocks
     )

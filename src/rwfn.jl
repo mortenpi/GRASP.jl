@@ -24,7 +24,7 @@ function read_rwfn(filename)
 
     orbitals = Ref{Ptr{OrbitalF90}}()
     norbitals = Ref{Cint}()
-    status = ccall( (:rwfnread, libgrasp_so),
+    status = ccall( (:rwfnread, libgraspjl_so),
         Cint, (Cstring, Ref{Cint}, Ref{Ptr{OrbitalF90}}),
         filename, norbitals, orbitals
     )
