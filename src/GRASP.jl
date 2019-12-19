@@ -20,9 +20,14 @@ end
 const libgrasp_so = joinpath(dirname(@__FILE__), "..", "deps", "libgrasp.so")
 isfile(libgrasp_so) || error("$(libgrasp_so) does not exist. Run `Pkg.build(\"GRASP\")`.")
 
+const libgrasp_rci_so = joinpath(dirname(@__FILE__), "..", "deps", "libgrasp-rci.so")
+isfile(libgrasp_rci_so) || error("$(libgrasp_rci_so) does not exist. Run `Pkg.build(\"GRASP\")`.")
+
 #
 # Additional includes and imports.
 # ------------------------------------------------------------------------------------------
+
+include("GRASPRCI.jl")
 
 include("Symmetries.jl")
 import .Symmetries: Parity, AngularMomentum, AngularSymmetry

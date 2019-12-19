@@ -2,9 +2,11 @@ CC_FLAGS=-g
 FC_FLAGS=-g -fPIC -std=f2008 -cpp $(FC_FLAGS_USER)
 
 TEST_BINDIR=../test/binaries
+LIBGRASP_RCI_SRC=$(GRASP)/lib/libgrasp-rci.so
 
 .PHONY: all
 all: libgrasp.so \
+	libgrasp-rci.so \
 	$(TEST_BINDIR)/test-libgrasp \
 	$(TEST_BINDIR)/test-readrwfn \
 	build_options.log
@@ -22,6 +24,9 @@ src/rwfnread.o: src/g2k_c_binding.o
 
 libgrasp.so: src/mixread.o src/rwfnread.o src/g2k_c_binding.o
 	$(FC) -shared -o $@ $^
+
+libgrasp-rci.so: $(LIBGRASP_RCI_SRC)
+	cp $^ $@
 
 # Targets for test binaries.
 # Note: they have an implicit dependence on libgrasp.so
