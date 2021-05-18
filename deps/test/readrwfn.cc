@@ -35,7 +35,7 @@ int main(int argc, char * argv[]) {
     int status = rwfnread(argv[1], &norbitals, &orbitals);
 
     if(status != 0) {
-        cout << "rwfnread returned with status = " << status << endl;
+        cout << "ERROR: rwfnread returned with status = " << status << endl;
         return 1;
     }
 
