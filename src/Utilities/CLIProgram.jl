@@ -6,4 +6,4 @@ module CLIProgram
 
 
 
-end module # CLIProgram
+end # CLIProgram
