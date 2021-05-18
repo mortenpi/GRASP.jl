@@ -9,7 +9,6 @@ using GRASP
 
 @testset "libgrasp" begin
     # Make sure that all files exist
-    @test isfile(joinpath(@__DIR__, "binaries/test-libgrasp"))
     @test isfile(joinpath(@__DIR__, "grasp/mixing/rmix.out"))
 
     @test_throws ErrorException GRASP.read_rmix("invalid-file.rmix")
