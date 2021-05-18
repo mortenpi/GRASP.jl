@@ -34,6 +34,8 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     type(orbital_t), dimension(1024) :: orbitals
     type(orbital_t), pointer, dimension(:) :: orbitals_allocatable
 
+    rwfnread = -1 ! in case we forget to set this before returning
+
     filename = from_cstring(filename_cstr)
     open(newunit=fhandle, file=filename, form="unformatted", status="old", iostat=ios, IOMSG=iom)
     if(ios /= 0) then
@@ -99,6 +101,8 @@ function rwfnread(filename_cstr, norbitals, orbitals_ptr) bind(c)
     orbitals_ptr = c_loc(orbitals_allocatable)
 
     close(fhandle)
+
+    rwfnread = 0 ! no error
     return
 
     ! Error handling for IO errors (reachable via goto)
