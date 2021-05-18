@@ -25,7 +25,7 @@ import GRASP: CSF, Symmetries
 
     # CSF(total2J, parity, orbs, coupled2Js)
     csf1 = CSF([orb1, orb2], [2, 4], angmom, angmom, Symmetries.even)
-    @test string(csf1) == "1s(2|0|0) 3d⁻(4|0|0) | 0+"
+    @test string(csf1) == "1s(2|0|0) 3d-(4|0|0) | 0+"
     @test nelectrons(csf1) == 6
 
     csf1b = CSF([orb1b, orb2], [2, 4], angmom, angmom, Symmetries.even)

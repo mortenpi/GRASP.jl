@@ -1,30 +1,6 @@
 # Relativistic CSLs and parsing of GRASP CSL files
 
 """
-    kappa_to_l(κ)
-
-Calculate the _l_ quantum number corresponding to the _κ_ quantum number.
-
-Note: _κ_ and _l_ values are always integers.
-"""
-function kappa_to_l(kappa::Integer)
-    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
-    (kappa < 0) ? -(kappa+1) : kappa
-end
-
-"""
-    kappa_to_j(κ) :: Rational
-
-Calculate the _j_ quantum number corresponding to the _κ_ quantum number.
-
-Note: _κ_ is always an integer.
-"""
-function kappa_to_j(kappa::Integer)
-    kappa == zero(kappa) && throw(ArgumentError("κ can not be zero"))
-    abs(kappa) - 1//2
-end
-
-"""
     kappa(::Orbital)
 
 Calculates the _κ_ quantum number of an orbital.
@@ -41,14 +17,14 @@ Calculates the _κ_ quantum number of an orbital.
 kappa(orb::RelativisticOrbital) = orb.κ
 
 angularmomentum(orb::Orbital) = AngularMomentum(orb.j)
-angularmomentum(orb::RelativisticOrbital) = AngularMomentum(AtomicLevels.kappa_to_j(orb.κ))
+angularmomentum(orb::RelativisticOrbital) = AngularMomentum(AtomicLevels.κ2j(orb.κ))
 angularmomentum(csf::AtomicLevels.CSF) = AngularMomentum(last(csf.terms))
 
 #
 # type CSFBlock
 # ------------------------------------------------------------------------------------------
 
-const IntCSF = AtomicLevels.CSF{RelativisticOrbital{Int},HalfInt,HalfInt}
+const IntCSF = AtomicLevels.CSF{RelativisticOrbital{Int},HalfInt,Missing}
 
 struct CSFBlock
     csfs :: Vector{IntCSF}
@@ -159,9 +135,10 @@ function parse_rcsf(filename)
             end
 
             config = AtomicLevels.Configuration(vcat(core_orbitals, orbitals), vcat(core_occupations, noccupations))
-            subshell_terms = map(x -> convert(Rational{Int}, x),
+            # We'll set the seniority quantum number to zero, which is not correct, but we don't parse it anyway
+            subshell_terms = map(x -> IntermediateTerm(convert(HalfInteger, x), missing),
                 vcat(core_couplings, Vector{AngularMomentum}(orbcouplings)))
-            terms = map(x -> convert(Rational{Int}, x),
+            terms = map(x -> convert(HalfInteger, x),
                 vcat(core_couplings, Vector{AngularMomentum}(csfcouplings)))
             csf = AtomicLevels.CSF(config, subshell_terms, terms)
 
@@ -174,6 +151,9 @@ function parse_rcsf(filename)
         return csfblocks
     end
 end
+
+# This is a hack to support missing as a disambiguating quantum number in CSF subshells
+AtomicLevels.assert_unique_classification(orb, occupation, term, ::Missing) = true
 
 function parse_csflines(line1, line2, line3)
     # Assuming that the CSF line consists of NNNLL(EE) blocks, each 9 characters long.
@@ -188,7 +168,7 @@ function parse_csflines(line1, line2, line3)
     for i = 1:norbitals
         orb = line1[9*(i-1)+1:9*i]
         @assert orb[6]=='(' && orb[9]==')'
-        orbital = AtomicLevels.orbital_from_string(RelativisticOrbital, strip(orb[1:5]))
+        orbital = parse(RelativisticOrbital, strip(orb[1:5]))
         # n = parse(Int, orb[1:3])
         # kappa = parse_j(orb[4:5])
         nelec = parse(Int, orb[7:8])
@@ -268,7 +248,7 @@ function parse_cores(line)
     orbstrings = split(line)
     orbs = RelativisticOrbital{Int}[]
     for os in orbstrings
-        push!(orbs, AtomicLevels.orbital_from_string(RelativisticOrbital, strip(os)))
+        push!(orbs, parse(RelativisticOrbital, strip(os)))
     end
     orbs
 end

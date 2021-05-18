@@ -9,7 +9,7 @@ export AngularSymmetry
 export absdiff
 
 using AtomicLevels
-using HalfIntegers: HalfInt
+using HalfIntegers: HalfInteger, HalfInt, half
 
 #
 # Parity
@@ -115,6 +115,7 @@ end
 Base.convert(::Type{AngularMomentum}, j::Union{Integer, Rational}) = AngularMomentum(j)
 Base.convert(::Type{Rational}, am::AngularMomentum) = convert(Rational{Int}, am)
 Base.convert(::Type{Rational{Int}}, am::AngularMomentum) = Rational(Int(am.twoj), 2)
+Base.convert(::Type{HalfInteger}, am::AngularMomentum) = half(convert(Int, am.twoj))
 
 import Base: +, *
 +(a::AngularMomentum, b::AngularMomentum) = AngularMomentum(convert(Rational, a) + convert(Rational, b))

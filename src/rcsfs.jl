@@ -131,6 +131,6 @@ function Base.print(io::IO, csf::CSF)
 end
 
 function kappa2rso(kappa :: Integer)
-    lstr = specname(kappa_to_l(kappa))
+    lstr = specname(κ2ℓ(kappa))
     (kappa < 0) ? lstr : lstr*"-"
 end

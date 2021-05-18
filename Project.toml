@@ -10,5 +10,8 @@ HalfIntegers = "f0d1745a-41c9-11e9-1dd9-e5d34d218721"
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[compat]
+AtomicLevels = "0.1.4"
+
 [targets]
 test = ["Test"]
