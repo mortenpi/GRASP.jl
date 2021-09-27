@@ -101,4 +101,6 @@ julia> GRASP.h2k_humanize(1.0)
 """
 h2k_humanize(x) = digitsep(round(Int, hartree2kayser(x)))
 
+include("rciqed.jl")
+
 end # module
