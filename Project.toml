@@ -7,11 +7,11 @@ AtomicLevels = "10933b4c-d60f-11e8-1fc6-bd9035a249a1"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 HalfIntegers = "f0d1745a-41c9-11e9-1dd9-e5d34d218721"
 
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
 [compat]
 AtomicLevels = "0.1.4"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test"]
